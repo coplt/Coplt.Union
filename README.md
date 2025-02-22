@@ -1,13 +1,13 @@
 # Sera.Union
 
-[![.NET](https://github.com/sera-net/Sera.Union/actions/workflows/dotnet.yml/badge.svg)](https://github.com/sera-net/Sera.Union/actions/workflows/dotnet.yml)
-![MIT](https://img.shields.io/github/license/sera-net/Sera.Union)
+[![.NET](https://github.com/coplt/Coplt.Union/actions/workflows/dotnet.yml/badge.svg)](https://github.com/coplt/Coplt.Union/actions/workflows/dotnet.yml)
+![MIT](https://img.shields.io/github/license/coplt/Coplt.Union)
 
 - Sera.Union  
-  [![Nuget](https://img.shields.io/nuget/v/Sera.Union)](https://www.nuget.org/packages/Sera.Union/)
+  [![Nuget](https://img.shields.io/nuget/v/Coplt.Union)](https://www.nuget.org/packages/Coplt.Union/)
   [![openupm](https://img.shields.io/npm/v/net.sera.union?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/net.sera.union/)
 - Sera.Union.Utilities  
-  [![Nuget](https://img.shields.io/nuget/v/Sera.Union.Utilities)](https://www.nuget.org/packages/Sera.Union.Utilities/)
+  [![Nuget](https://img.shields.io/nuget/v/Coplt.Union.Utilities)](https://www.nuget.org/packages/Coplt.Union.Utilities/)
 
 Generate Tagged Union using source generator
 
@@ -45,10 +45,10 @@ Generate output:
 
 #nullable enable
 
-using Sera.TaggedUnion;
+using Coplt.Union;
 
 public readonly partial struct Union1
-    : global::Sera.TaggedUnion.ITaggedUnion
+    : global::Coplt.Union.ITaggedUnion
     , global::System.IEquatable<Union1>
     , global::System.IComparable<Union1>
 #if NET7_0_OR_GREATER
@@ -356,10 +356,10 @@ Generate output:
 
 #nullable enable
 
-using Sera.TaggedUnion;
+using Coplt.Union;
 
 public partial struct Option<T>
-    : global::Sera.TaggedUnion.ITaggedUnion
+    : global::Coplt.Union.ITaggedUnion
     , global::System.IEquatable<Option<T>>
     , global::System.IComparable<Option<T>>
 #if NET7_0_OR_GREATER
@@ -489,10 +489,10 @@ public partial struct Option<T>
 
 #nullable enable
 
-using Sera.TaggedUnion;
+using Coplt.Union;
 
 public partial struct Result<T, E>
-    : global::Sera.TaggedUnion.ITaggedUnion
+    : global::Coplt.Union.ITaggedUnion
     , global::System.IEquatable<Result<T, E>>
     , global::System.IComparable<Result<T, E>>
 #if NET7_0_OR_GREATER
