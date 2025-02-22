@@ -2,12 +2,12 @@
 
     <PropertyGroup>
         <TargetFramework>netstandard2.0</TargetFramework>
-        <LangVersion>12.0</LangVersion>
+        <LangVersion>13.0</LangVersion>
         <Nullable>enable</Nullable>
         <EnforceExtendedAnalyzerRules>true</EnforceExtendedAnalyzerRules>
         <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
         <IsRoslynComponent>true</IsRoslynComponent>
-        <Version>0.3.1</Version>
+        <Version>0.8.0</Version>
     </PropertyGroup>
 
     <ItemGroup>

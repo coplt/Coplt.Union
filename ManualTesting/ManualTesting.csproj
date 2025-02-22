@@ -8,8 +8,8 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Sera.TaggedUnion.Analyzers\Sera.TaggedUnion.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-      <ProjectReference Include="..\Sera.TaggedUnion\Sera.TaggedUnion.csproj" />
+      <ProjectReference Include="..\Coplt.Union.Analyzers\Coplt.Union.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+      <ProjectReference Include="..\Coplt.Union\Coplt.Union.csproj" />
     </ItemGroup>
 
 </Project>

@@ -1,4 +1,4 @@
-﻿namespace Sera.TaggedUnion.Analyzers.Utilities;
+﻿namespace Coplt.Union.Analyzers.Utilities;
 
 public readonly record struct NameWrap(string Code)
 {

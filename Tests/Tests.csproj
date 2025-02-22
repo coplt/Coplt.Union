@@ -18,9 +18,9 @@
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Sera.TaggedUnion.Analyzers\Sera.TaggedUnion.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-      <ProjectReference Include="..\Sera.TaggedUnion\Sera.TaggedUnion.csproj" />
-      <ProjectReference Include="..\Sera.Union.Utilities\Sera.Union.Utilities.csproj" />
+      <ProjectReference Include="..\Coplt.Union.Analyzers\Coplt.Union.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
+      <ProjectReference Include="..\Coplt.Union\Coplt.Union.csproj" />
+      <ProjectReference Include="..\Coplt.Union.Utilities\Coplt.Union.Utilities.csproj" />
     </ItemGroup>
 
 </Project>

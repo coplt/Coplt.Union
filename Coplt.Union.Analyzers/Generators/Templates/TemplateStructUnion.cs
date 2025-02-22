@@ -4,12 +4,12 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using Coplt.Union.Analyzers.Resources;
+using Coplt.Union.Analyzers.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
-using Sera.TaggedUnion.Analyzers.Resources;
-using Sera.TaggedUnion.Analyzers.Utilities;
 
-namespace Sera.TaggedUnion.Analyzers.Generators.Templates;
+namespace Coplt.Union.Analyzers.Generators.Templates;
 
 public enum UnionCaseTypeKind
 {
@@ -108,7 +108,7 @@ public class TemplateStructUnion(
         }
 
         sb.AppendLine(GenBase.Target.Code);
-        sb.AppendLine($"    : global::Sera.TaggedUnion.ITaggedUnion");
+        sb.AppendLine($"    : global::Coplt.Union.ITaggedUnion");
         if (genMethods.genEquals)
             sb.AppendLine($"    , global::System.IEquatable<{TypeName}>");
         if (genMethods.genCompareTo)

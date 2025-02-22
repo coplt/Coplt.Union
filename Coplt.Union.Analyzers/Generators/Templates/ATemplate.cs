@@ -2,10 +2,10 @@
 using System.Collections.Immutable;
 using System.Linq;
 using System.Text;
+using Coplt.Union.Analyzers.Utilities;
 using Microsoft.CodeAnalysis;
-using Sera.TaggedUnion.Analyzers.Utilities;
 
-namespace Sera.TaggedUnion.Analyzers.Generators.Templates;
+namespace Coplt.Union.Analyzers.Generators.Templates;
 
 public readonly record struct GenBase(
     string RawFullName, NullableContextOptions Nullable, HashSet<string> Usings,

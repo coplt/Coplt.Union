@@ -1,4 +1,4 @@
-﻿namespace Sera.TaggedUnion.Misc;
+﻿namespace Coplt.Union.Analyzers.Utilities;
 
 public enum MayBool : byte
 {

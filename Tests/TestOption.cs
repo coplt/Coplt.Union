@@ -2,7 +2,7 @@
 
 namespace Tests;
 
-using OptionInt = Sera.TaggedUnion.Utilities.Option<int>;
+using OptionInt = Coplt.Union.Utilities.Option<int>;
 
 public class TestOption
 {

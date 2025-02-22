@@ -1,4 +1,4 @@
-﻿using Sera.TaggedUnion;
+﻿using Coplt.Union;
 
 namespace Tests;
 

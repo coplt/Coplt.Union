@@ -1,14 +1,14 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Coplt.Union.Analyzers.Generators.Templates;
+using Coplt.Union.Analyzers.Resources;
+using Coplt.Union.Analyzers.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
-using Sera.TaggedUnion.Analyzers.Generators.Templates;
-using Sera.TaggedUnion.Analyzers.Resources;
-using Sera.TaggedUnion.Analyzers.Utilities;
 
-namespace Sera.TaggedUnion.Analyzers.Generators;
+namespace Coplt.Union.Analyzers.Generators;
 
 [Generator]
 public class UnionGenerator : IIncrementalGenerator
@@ -16,7 +16,7 @@ public class UnionGenerator : IIncrementalGenerator
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var sources = context.SyntaxProvider.ForAttributeWithMetadataName(
-                "Sera.TaggedUnion.UnionAttribute",
+                "Coplt.Union.UnionAttribute",
                 static (syntax, _) => syntax is StructDeclarationSyntax or ClassDeclarationSyntax,
                 static (ctx, _) =>
                 {
@@ -70,7 +70,7 @@ public class UnionGenerator : IIncrementalGenerator
                     {
                         var (_, symbol) = i;
                         return symbol!.GetAttributes().Any(a =>
-                            a.AttributeClass?.ToDisplayString() == "Sera.TaggedUnion.UnionTemplateAttribute");
+                            a.AttributeClass?.ToDisplayString() == "Coplt.Union.UnionTemplateAttribute");
                     })
                     .ToArray();
                 if (templates.Length > 1)
@@ -95,7 +95,7 @@ public class UnionGenerator : IIncrementalGenerator
                             var kind = UnionCaseTypeKind.None;
                             var member_symbol = (IMethodSymbol)semanticModel.GetDeclaredSymbol(mds)!;
                             var tag_attr = member_symbol.GetAttributes().FirstOrDefault(a =>
-                                a.AttributeClass?.ToDisplayString() == "Sera.TaggedUnion.UnionTagAttribute");
+                                a.AttributeClass?.ToDisplayString() == "Coplt.Union.UnionTagAttribute");
                             if (tag_attr != null)
                             {
                                 tag = tag_attr.ConstructorArguments.First().Value?.ToString() ?? tag;
@@ -110,11 +110,11 @@ public class UnionGenerator : IIncrementalGenerator
                                 if (!ret_type_symbol.IsReferenceType) kind = UnionCaseTypeKind.None;
                             }
                             var symbol_attr = member_symbol.GetAttributes().FirstOrDefault(a =>
-                                a.AttributeClass?.ToDisplayString() == "Sera.TaggedUnion.UnionSymbolAttribute");
+                                a.AttributeClass?.ToDisplayString() == "Coplt.Union.UnionSymbolAttribute");
                             if (symbol_attr == null)
                             {
                                 symbol_attr = ret_type_symbol.GetAttributes().FirstOrDefault(a =>
-                                    a.AttributeClass?.ToDisplayString() == "Sera.TaggedUnion.UnionSymbolAttribute");
+                                    a.AttributeClass?.ToDisplayString() == "Coplt.Union.UnionSymbolAttribute");
                             }
                             if (symbol_attr != null)
                             {

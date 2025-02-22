@@ -1,7 +1,7 @@
 ﻿using System.Text.Json.Serialization;
-using Sera.TaggedUnion.Utilities.Json;
+using Coplt.Union.Utilities.Json;
 
-namespace Sera.TaggedUnion.Utilities;
+namespace Coplt.Union.Utilities;
 
 [Union]
 [JsonConverter(typeof(OptionConverter))]

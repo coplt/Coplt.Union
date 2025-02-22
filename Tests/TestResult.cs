@@ -2,7 +2,7 @@
 
 namespace Tests;
 
-using ResultIntInt = Sera.TaggedUnion.Utilities.Result<int, int>;
+using ResultIntInt = Coplt.Union.Utilities.Result<int, int>;
 
 public class TestResult
 {

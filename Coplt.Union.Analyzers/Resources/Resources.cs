@@ -1,7 +1,7 @@
 ﻿using System.Resources;
 using Microsoft.CodeAnalysis;
 
-namespace Sera.TaggedUnion.Analyzers.Resources;
+namespace Coplt.Union.Analyzers.Resources;
 
 public static class Strings
 {

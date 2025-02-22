@@ -1,5 +1,5 @@
-﻿using Sera.TaggedUnion;
-using Sera.TaggedUnion.Misc;
+﻿using Coplt.Union;
+using Coplt.Union.Misc;
 
 namespace Tests;
 

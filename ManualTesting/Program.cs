@@ -1,5 +1,5 @@
 ﻿using System.Runtime.InteropServices;
-using Sera.TaggedUnion;
+using Coplt.Union;
 
 #pragma warning disable CS0219
 

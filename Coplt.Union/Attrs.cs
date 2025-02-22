@@ -1,8 +1,11 @@
 ﻿using System;
-using Sera.TaggedUnion.Misc;
+using Coplt.Union.Misc;
 
-namespace Sera.TaggedUnion;
+namespace Coplt.Union;
 
+/// <summary>
+/// Union
+/// </summary>
 [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class, Inherited = false)]
 public sealed class UnionAttribute : Attribute
 {
@@ -42,12 +45,21 @@ public sealed class UnionAttribute : Attribute
     public bool GenerateCompareTo { get; set; } = true;
 }
 
+/// <summary>
+/// UnionTemplate
+/// </summary>
 [AttributeUsage(AttributeTargets.Interface)]
 public sealed class UnionTemplateAttribute : Attribute;
 
+/// <summary>
+/// UnionTag
+/// </summary>
 [AttributeUsage(AttributeTargets.Method, Inherited = false)]
 public sealed class UnionTagAttribute(object tag) : Attribute
 {
+    /// <summary>
+    /// Tag
+    /// </summary>
     public object Tag { get; } = tag;
 }
 

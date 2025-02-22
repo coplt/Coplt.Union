@@ -1,4 +1,4 @@
-﻿namespace Sera.TaggedUnion.Analyzers.Utilities;
+﻿namespace Coplt.Union.Analyzers.Utilities;
 
 public record struct AlwaysEq<T>(T Value)
 {

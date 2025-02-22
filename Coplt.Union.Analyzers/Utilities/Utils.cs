@@ -4,7 +4,7 @@ using System.Linq;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 
-namespace Sera.TaggedUnion.Analyzers.Utilities;
+namespace Coplt.Union.Analyzers.Utilities;
 
 internal static class Utils
 {

@@ -2,7 +2,7 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace Sera.TaggedUnion.Utilities.Json;
+namespace Coplt.Union.Utilities.Json;
 
 public class ResultConverter : JsonConverterFactory
 {
