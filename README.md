@@ -1,4 +1,4 @@
-# Sera.Union
+# Coplt.Union
 
 [![.NET](https://github.com/coplt/Coplt.Union/actions/workflows/dotnet.yml/badge.svg)](https://github.com/coplt/Coplt.Union/actions/workflows/dotnet.yml)
 ![MIT](https://img.shields.io/github/license/coplt/Coplt.Union)
@@ -13,7 +13,7 @@ Generate Tagged Union using source generator
 
 - All unmanaged types will overlap
 - All classes will overlap
-- Other types will be tiled
+- Other types are sequential
 
 ## Example
 
@@ -303,6 +303,9 @@ public readonly partial struct Union1
 
 #### How to use
 
+You can use pattern matching or manually determine the Tag.  
+But remember C# **does not have enum exhaustion semantics**.
+
 ```cs
 var u = Union1.MakeA(123);
 
@@ -313,6 +316,20 @@ if (u is { IsA: true, A: var a }) { }
 if (u.IsA)
 {
     var a = u.A;
+}
+
+switch (u.Tag)
+{
+    case Union1.Tags.A:
+        break;
+  ...
+}
+
+switch (u.Tag)
+{
+    case { IsA: true, A: var a }:
+        break;
+  ...
 }
 ```
 
