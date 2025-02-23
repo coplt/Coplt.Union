@@ -5,7 +5,7 @@
     <PropertyGroup>
         <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
         <PackageId>Coplt.Union</PackageId>
-        <Version>0.9.0-alpha.0</Version>
+        <Version>0.9.0-alpha.1</Version>
         <IsPackable>true</IsPackable>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
     </PropertyGroup>
@@ -57,11 +57,15 @@
     <ItemGroup>
         <None Include="..\LICENSE">
             <Pack>True</Pack>
-            <PackagePath>\</PackagePath>
+            <PackagePath>/</PackagePath>
         </None>
         <None Include="..\README.md">
             <Pack>True</Pack>
-            <PackagePath>\</PackagePath>
+            <PackagePath>/</PackagePath>
+        </None>
+        <None Include=".\Coplt.Union.props">
+            <Pack>True</Pack>
+            <PackagePath>build/</PackagePath>
         </None>
         <None Include="..\Coplt.Union.Analyzers\bin\Release\netstandard2.0\Coplt.Union.Analyzers.dll" Visible="false" Condition="'$(Configuration)' == 'Release'">
             <Pack>True</Pack>
