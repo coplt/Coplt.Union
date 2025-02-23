@@ -1,4 +1,8 @@
-﻿## 0.9.0
+﻿## 0.10.0
+- Breaking Changes
+  - Tags are now no longer in explicit assignment order, and are no longer 1 if the first item is void
+
+## 0.9.0
 - Breaking Changes
   - Switch to the source package, and change the access rights of related classes from public to internal
 

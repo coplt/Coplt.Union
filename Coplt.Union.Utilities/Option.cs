@@ -10,10 +10,8 @@ public readonly partial struct Option<T>
     [UnionTemplate]
     private interface Template
     {
-        T Some();
-
-        [UnionTag(0)]
         void None();
+        T Some();
     }
 
     public Option() => this = MakeNone();
@@ -25,6 +23,6 @@ public readonly partial struct Option<T>
     public T Value => Some;
 
     public static implicit operator Option<T>(T value) => new(value);
-    
+
     public static explicit operator T(Option<T> value) => value.Value;
 }

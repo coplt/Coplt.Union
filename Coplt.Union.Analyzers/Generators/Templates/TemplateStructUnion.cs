@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -19,7 +20,7 @@ public enum UnionCaseTypeKind
     Class
 }
 
-public record struct UnionCase(string Name, string Tag, string Type, UnionCaseTypeKind Kind, bool IsGeneric);
+public record struct UnionCase(string Name, string? Tag, string Type, UnionCaseTypeKind Kind, bool IsGeneric);
 
 public record struct UnionAttr(string TagsName, bool ExternalTags, string ExternalTagsName, string? TagsUnderlying)
 {
@@ -196,7 +197,9 @@ public class TemplateStructUnion(
         sb.AppendLine($"{spaces}{{");
         foreach (var @case in Cases)
         {
-            sb.AppendLine($"{spaces}    {@case.Name} = {@case.Tag},");
+            sb.Append($"{spaces}    {@case.Name}");
+            if (@case.Tag != null) sb.Append($" = {@case.Tag}");
+            sb.AppendLine(",");
         }
         sb.AppendLine($"{spaces}}}");
     }

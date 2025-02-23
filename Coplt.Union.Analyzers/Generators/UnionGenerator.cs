@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using Coplt.Analyzers.Generators.Templates;
 using Coplt.Union.Analyzers.Generators.Templates;
@@ -91,15 +92,19 @@ public class UnionGenerator : IIncrementalGenerator
                         if (member is MethodDeclarationSyntax mds)
                         {
                             var case_name = mds.Identifier.ToString();
-                            var tag = $"{i + 1}";
                             var ret_type = mds.ReturnType.ToString();
                             var kind = UnionCaseTypeKind.None;
                             var member_symbol = (IMethodSymbol)semanticModel.GetDeclaredSymbol(mds)!;
                             var tag_attr = member_symbol.GetAttributes().FirstOrDefault(a =>
                                 a.AttributeClass?.ToDisplayString() == "Coplt.Union.UnionTagAttribute");
+                            string? tag = null;
                             if (tag_attr != null)
                             {
-                                tag = tag_attr.ConstructorArguments.First().Value?.ToString() ?? tag;
+                                tag = tag_attr.ConstructorArguments.First().Value?.ToString();
+                            }
+                            if (i == 0 && tag == null && ret_type != "void")
+                            {
+                                tag = "1";
                             }
                             var ret_type_symbol = member_symbol.ReturnType;
                             var is_generic = ret_type_symbol.IsNotInstGenericType();
