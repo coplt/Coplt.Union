@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
         <RootNamespace>Coplt.Union.Utilities</RootNamespace>
-        <Version>0.8.0</Version>
+        <Version>0.9.0</Version>
         <Description>Tagged union for c#</Description>
         <PackageProjectUrl>https://github.com/coplt/Coplt.Union</PackageProjectUrl>
         <RepositoryUrl>https://github.com/coplt/Coplt.Union</RepositoryUrl>
@@ -21,35 +21,22 @@
         <ProjectReference Include="..\Coplt.Union.Analyzers\Coplt.Union.Analyzers.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer">
             <PrivateAssets>all</PrivateAssets>
         </ProjectReference>
-        <ProjectReference Include="..\Coplt.Union.Source\Coplt.Union.Source.csproj" ReferenceOutputAssembly="false" />
     </ItemGroup>
 
     <ItemGroup>
-        <Compile Include="..\Coplt.Union\**\*.cs">
-            <Pack>true</Pack>
-            <PackagePath>$(ContentTargetFolders)\cs\any\$(PackageId)\</PackagePath>
-            <Visible>false</Visible>
-        </Compile>
+        <Compile Include="..\Coplt.Union\**\*.cs" Visible="false"/>
         <Compile Remove="..\Coplt.Union\obj\**"/>
         <Compile Remove="..\Coplt.Union\bin\**"/>
-
-        <Compile Update="@(Compile)">
-            <Pack>true</Pack>
-        </Compile>
-
-        <EmbeddedResource Update="@(EmbeddedResource)">
-            <Pack>true</Pack>
-        </EmbeddedResource>
     </ItemGroup>
 
     <ItemGroup>
-        <None Include="..\LICENSE" Pack="true" PackagePath="\" />
-        <None Include="..\README.md" Pack="true" PackagePath="\" />
+        <None Include="..\LICENSE" Pack="true" PackagePath="\"/>
+        <None Include="..\README.md" Pack="true" PackagePath="\"/>
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1" />
-      <PackageReference Include="System.Text.Json" Version="8.0.5" />
+        <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1"/>
+        <PackageReference Include="System.Text.Json" Version="8.0.5"/>
     </ItemGroup>
 
 </Project>
