@@ -2,32 +2,14 @@
 
     <PropertyGroup>
         <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
-        <LangVersion>13.0</LangVersion>
+        <LangVersion>9.0</LangVersion>
         <Nullable>enable</Nullable>
-        <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-        <AssemblyName>Coplt.Union</AssemblyName>
-        <Version>0.8.0</Version>
-        <Description>Tagged union for c#</Description>
-        <PackageProjectUrl>https://github.com/coplt/Coplt.Union</PackageProjectUrl>
-        <RepositoryUrl>https://github.com/coplt/Coplt.Union</RepositoryUrl>
-        <PackageTags>union;tagged;discriminated;unions</PackageTags>
-        <PackageReadmeFile>README.md</PackageReadmeFile>
-        <PackageLicenseFile>LICENSE</PackageLicenseFile>
-        <PackageRequireLicenseAcceptance>True</PackageRequireLicenseAcceptance>
-        <GenerateDocumentationFile>True</GenerateDocumentationFile>
     </PropertyGroup>
 
     <ItemGroup>
         <ProjectReference Include="..\Coplt.Union.Analyzers\Coplt.Union.Analyzers.csproj" ReferenceOutputAssembly="false" OutputItemType="Analyzer">
             <PrivateAssets>all</PrivateAssets>
         </ProjectReference>
-    </ItemGroup>
-
-    <ItemGroup>
-        <None Include="..\LICENSE" Pack="true" PackagePath="\"/>
-        <None Include="..\README.md" Pack="true" PackagePath="\"/>
-        <None Include="..\Coplt.Union.Analyzers\bin\Release\netstandard2.0\Coplt.Union.Analyzers.dll" Pack="true" PackagePath="analyzers/dotnet/cs" Visible="false" Condition="'$(Configuration)' == 'Release'"/>
-        <None Include="..\Coplt.Union.Analyzers\bin\Release\netstandard2.0\zh-Hans\Coplt.Union.Analyzers.resources.dll" Pack="true" PackagePath="analyzers/dotnet/cs/zh-Hans" Visible="false" Condition="'$(Configuration)' == 'Release'"/>
     </ItemGroup>
 
 </Project>

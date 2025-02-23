@@ -5,9 +5,10 @@ using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
 using Coplt.Union.Analyzers.Resources;
-using Coplt.Union.Analyzers.Utilities;
+using Coplt.Analyzers.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
+using ATemplate = Coplt.Analyzers.Generators.Templates.ATemplate;
 
 namespace Coplt.Union.Analyzers.Generators.Templates;
 
@@ -69,7 +70,7 @@ public record struct UnionAttr(string TagsName, bool ExternalTags, string Extern
 public record struct UnionGenerateMethod(bool genToString, bool genEquals, bool genCompareTo);
 
 public class TemplateStructUnion(
-    GenBase GenBase,
+    Coplt.Analyzers.Generators.Templates.GenBase GenBase,
     string Name,
     UnionAttr Attr,
     bool ReadOnly,

@@ -1,20 +1,21 @@
-﻿namespace Coplt.Union.Misc;
-
-/// <summary>
-/// Three-valued bool
-/// </summary>
-public enum MayBool : byte
+﻿namespace Coplt.Union.Misc
 {
     /// <summary>
-    /// False
+    /// Three-valued bool
     /// </summary>
-    False = 0,
-    /// <summary>
-    /// True
-    /// </summary>
-    True = 1,
-    /// <summary>
-    /// None
-    /// </summary>
-    None = 255,
+    internal enum MayBool : byte
+    {
+        /// <summary>
+        /// False
+        /// </summary>
+        False = 0,
+        /// <summary>
+        /// True
+        /// </summary>
+        True = 1,
+        /// <summary>
+        /// None
+        /// </summary>
+        None = 255,
+    }
 }

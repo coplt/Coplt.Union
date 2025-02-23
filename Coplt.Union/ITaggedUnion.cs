@@ -1,6 +1,7 @@
-﻿namespace Coplt.Union;
-
-/// <summary>
-/// ITaggedUnion
-/// </summary>
-public interface ITaggedUnion { }
+﻿namespace Coplt.Union
+{
+    /// <summary>
+    /// ITaggedUnion
+    /// </summary>
+    internal interface ITaggedUnion { }
+}

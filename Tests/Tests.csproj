@@ -19,8 +19,25 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Coplt.Union.Analyzers\Coplt.Union.Analyzers.csproj" OutputItemType="Analyzer" ReferenceOutputAssembly="false" />
-      <ProjectReference Include="..\Coplt.Union\Coplt.Union.csproj" />
       <ProjectReference Include="..\Coplt.Union.Utilities\Coplt.Union.Utilities.csproj" />
+    </ItemGroup>
+
+    <ItemGroup>
+        <Compile Include="..\Coplt.Union\**\*.cs">
+            <Pack>true</Pack>
+            <PackagePath>$(ContentTargetFolders)\cs\any\$(PackageId)\</PackagePath>
+            <Visible>false</Visible>
+        </Compile>
+        <Compile Remove="..\Coplt.Union\obj\**"/>
+        <Compile Remove="..\Coplt.Union\bin\**"/>
+
+        <Compile Update="@(Compile)">
+            <Pack>true</Pack>
+        </Compile>
+
+        <EmbeddedResource Update="@(EmbeddedResource)">
+            <Pack>true</Pack>
+        </EmbeddedResource>
     </ItemGroup>
 
 </Project>

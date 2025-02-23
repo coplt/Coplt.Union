@@ -1,9 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Coplt.Analyzers.Generators.Templates;
 using Coplt.Union.Analyzers.Generators.Templates;
 using Coplt.Union.Analyzers.Resources;
-using Coplt.Union.Analyzers.Utilities;
+using Coplt.Analyzers.Utilities;
 using Microsoft.CodeAnalysis;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using Microsoft.CodeAnalysis.Text;
