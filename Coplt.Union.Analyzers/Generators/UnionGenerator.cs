@@ -15,6 +15,7 @@ namespace Coplt.Union.Analyzers.Generators;
 [Generator]
 public class UnionGenerator : IIncrementalGenerator
 {
+    public const string Id = "Union";
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
         var sources = context.SyntaxProvider.ForAttributeWithMetadataName(
@@ -77,7 +78,7 @@ public class UnionGenerator : IIncrementalGenerator
                     .ToArray();
                 if (templates.Length > 1)
                 {
-                    var desc = Utils.MakeWarning(Strings.Get("Generator.Union.Error.MultiTemplate"));
+                    var desc = Utils.MakeWarning(Id, Strings.Get("Generator.Union.Error.MultiTemplate"));
                     foreach (var t in templates)
                     {
                         diagnostics.Value.Add(Diagnostic.Create(desc, t.t.Identifier.GetLocation()));
@@ -149,7 +150,7 @@ public class UnionGenerator : IIncrementalGenerator
                                         ret_type_symbol.OriginalDefinition.ContainingAssembly,
                                         compilation.Assembly))
                                 {
-                                    var desc = Utils.MakeInfo(
+                                    var desc = Utils.MakeInfo(Id,
                                         Strings.Get("Generator.Union.Info.PossiblyInvalidSymbol"));
                                     diagnostics.Value.Add(Diagnostic.Create(desc, member.GetLocation()));
                                 }
@@ -158,7 +159,8 @@ public class UnionGenerator : IIncrementalGenerator
                         }
                         else
                         {
-                            var desc = Utils.MakeWarning(Strings.Get("Generator.Union.Error.IllegalTemplateMember"));
+                            var desc = Utils.MakeWarning(Id,
+                                Strings.Get("Generator.Union.Error.IllegalTemplateMember"));
                             if (member is BaseTypeDeclarationSyntax bts)
                             {
                                 diagnostics.Value.Add(Diagnostic.Create(desc, bts.Identifier.GetLocation()));

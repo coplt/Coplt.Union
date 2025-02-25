@@ -46,7 +46,7 @@ public record struct UnionAttr(string TagsName, bool ExternalTags, string Extern
                         or "ulong"))
                     {
                         a.TagsUnderlying = null;
-                        var desc = Utils.MakeError(Strings.Get("Generator.Union.Error.Underlying"));
+                        var desc = Utils.MakeError(UnionGenerator.Id, Strings.Get("Generator.Union.Error.Underlying"));
                         var syntax = (AttributeSyntax)data.ApplicationSyntaxReference!.GetSyntax();
                         try
                         {
