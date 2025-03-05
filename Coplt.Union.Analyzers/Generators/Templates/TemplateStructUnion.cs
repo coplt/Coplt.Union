@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Numerics;
+using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
@@ -91,8 +92,19 @@ public class TemplateStructUnion(
 
     private string @readonly => IsClass ? string.Empty : " readonly";
 
+    private string Self = null!;
+
+    private string RoSelf = null!;
+
     protected override void DoGen()
     {
+        Self = IsClass || ReadOnly
+            ? "this"
+            : $"global::System.Runtime.CompilerServices.Unsafe.AsRef<{TypeName}>(in this)";
+        RoSelf = IsClass || !ReadOnly
+            ? "this"
+            : $"global::System.Runtime.CompilerServices.Unsafe.AsRef<{TypeName}>(in this)";
+
         {
             using var sha = SHA256.Create();
             var bytes = sha.ComputeHash(MemoryMarshal.AsBytes(FullName.AsSpan()).ToArray());
@@ -389,42 +401,36 @@ public class TemplateStructUnion(
         foreach (var @case in Cases)
         {
             if (@case.Type == "void") continue;
-            sb.AppendLine($"    public {@case.Type} {@case.Name}");
+            if (!IsClass) sb.AppendLine("    [global::System.Diagnostics.CodeAnalysis.UnscopedRef]");
+            var ro = ReadOnly ? " readonly" : "";
+            sb.AppendLine($"    public ref{ro} {@case.Type} {@case.Name}");
             sb.AppendLine($"    {{");
 
-            void GenField(bool get)
+            void GenField()
             {
                 if (@case.Kind == UnionCaseTypeKind.None)
                 {
                     var index = other_types![@case.Type];
-                    sb.Append($"this._impl._{index}");
-                    if (!get) sb.Append($" = ");
-                    else sb.Append("!");
+                    sb.Append($"this._impl._{index}!");
                 }
                 else if (@case.Kind == UnionCaseTypeKind.Class)
                 {
                     if (@case.IsGeneric)
                     {
-                        if (get) sb.Append($"({@case.Type})");
                         var index = class_types!["object?"];
-                        sb.Append($"this._impl._class_._{index}");
-                        if (!get) sb.Append($" = ({@case.Type})");
-                        else sb.Append("!");
+                        sb.Append(
+                            $"global::System.Runtime.CompilerServices.Unsafe.As<object, {@case.Type}>(ref {RoSelf}._impl._class_._{index}!)");
                     }
                     else
                     {
                         var index = class_types![@case.Type];
-                        sb.Append($"this._impl._class_._{index}");
-                        if (!get) sb.Append($" = ");
-                        else sb.Append("!");
+                        sb.Append($"this._impl._class_._{index}!");
                     }
                 }
                 else if (@case.Kind == UnionCaseTypeKind.Unmanaged)
                 {
                     var index = unmanaged_types![@case.Type];
-                    sb.Append($"this._impl._unmanaged_._{index}");
-                    if (!get) sb.Append($" = ");
-                    else sb.Append("!");
+                    sb.Append($"this._impl._unmanaged_._{index}!");
                 }
             }
 
@@ -432,24 +438,12 @@ public class TemplateStructUnion(
 
             sb.AppendLine($"        {AggressiveInlining}");
             sb.Append($"        ");
-            if (!ReadOnly && !IsClass) sb.Append($"readonly ");
-            sb.Append($"get => !this.Is{@case.Name} ? default! : ");
-            GenField(true);
+            sb.Append(
+                $"get => ref !this.Is{@case.Name} ? ref global::System.Runtime.CompilerServices.Unsafe.NullRef<{@case.Type}>() : ref ");
+            GenField();
             sb.AppendLine($";");
 
             #endregion
-
-            if (!ReadOnly)
-            {
-                #region setter
-
-                sb.AppendLine($"        {AggressiveInlining}");
-                sb.Append($"        set {{ if (this.Is{@case.Name}) {{ ");
-                GenField(false);
-                sb.AppendLine($"value; }} }}");
-
-                #endregion
-            }
 
             sb.AppendLine($"    }}");
         }
@@ -471,7 +465,7 @@ public class TemplateStructUnion(
         {
             if (@case.Type == "void") continue;
             sb.AppendLine(
-                $"        {tags_name}.{@case.Name} => global::System.Collections.Generic.EqualityComparer<{@case.Type}>.Default.Equals(this.{@case.Name}, other.{@case.Name}),");
+                $"        {tags_name}.{@case.Name} => global::System.Collections.Generic.EqualityComparer<{@case.Type}>.Default.Equals({Self}.{@case.Name}, other.{@case.Name}),");
         }
         sb.AppendLine($"        _ => true,");
         sb.AppendLine($"    }};");
@@ -489,7 +483,7 @@ public class TemplateStructUnion(
         {
             if (@case.Type == "void") continue;
             sb.AppendLine(
-                $"        {tags_name}.{@case.Name} => global::System.HashCode.Combine(this.Tag, this.{@case.Name}),");
+                $"        {tags_name}.{@case.Name} => global::System.HashCode.Combine(this.Tag, {Self}.{@case.Name}),");
         }
         sb.AppendLine($"        _ => global::System.HashCode.Combine(this.Tag),");
         sb.AppendLine($"    }};");
@@ -532,7 +526,7 @@ public class TemplateStructUnion(
         {
             if (@case.Type == "void") continue;
             sb.AppendLine(
-                $"        {tags_name}.{@case.Name} => global::System.Collections.Generic.Comparer<{@case.Type}>.Default.Compare(this.{@case.Name}, other.{@case.Name}),");
+                $"        {tags_name}.{@case.Name} => global::System.Collections.Generic.Comparer<{@case.Type}>.Default.Compare({Self}.{@case.Name}, other.{@case.Name}),");
         }
         sb.AppendLine($"        _ => 0,");
         sb.AppendLine($"    }};");
@@ -569,7 +563,7 @@ public class TemplateStructUnion(
         {
             sb.Append(
                 $"        {tags_name}.{@case.Name} => $\"{{nameof({TypeName})}}.{{nameof({tags_name}.{@case.Name})}}");
-            if (@case.Type != "void") sb.Append($" {{{{ {{this.{@case.Name}}} }}}}");
+            if (@case.Type != "void") sb.Append($" {{{{ {{({Self}.{@case.Name})}} }}}}");
             sb.AppendLine($"\",");
         }
         sb.AppendLine($"        _ => nameof({TypeName}),");

@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
         <RootNamespace>Coplt.Union.Utilities</RootNamespace>
-        <Version>0.10.0</Version>
+        <Version>0.12.0</Version>
         <Description>Tagged union for c#</Description>
         <PackageProjectUrl>https://github.com/coplt/Coplt.Union</PackageProjectUrl>
         <RepositoryUrl>https://github.com/coplt/Coplt.Union</RepositoryUrl>
@@ -36,6 +36,10 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.Bcl.HashCode" Version="1.1.1"/>
+        <PackageReference Include="PolySharp" Version="1.15.0">
+          <PrivateAssets>all</PrivateAssets>
+          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+        </PackageReference>
         <PackageReference Include="System.Text.Json" Version="8.0.5"/>
     </ItemGroup>
 

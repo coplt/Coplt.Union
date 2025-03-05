@@ -1,4 +1,8 @@
-﻿## 0.11.0
+﻿## 0.12.0
+- Breaking Changes
+  - Variant getters now return references, no more variant setters
+
+## 0.11.0
 - Fix Bug
 
 ## 0.10.0

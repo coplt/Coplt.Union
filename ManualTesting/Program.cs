@@ -11,6 +11,16 @@ Console.WriteLine(a);
 var b = SomeClass<string>.MakeFoo("asd");
 Console.WriteLine(b);
 
+switch (b)
+{
+    case { IsA: true, A: var aa }:
+        Console.WriteLine(aa);
+        break;
+    case { IsFoo: true, Foo: var aa }:
+        Console.WriteLine(aa);
+        break;
+}
+
 //var foo = new Foo<int>();
 //Console.WriteLine(foo);
 

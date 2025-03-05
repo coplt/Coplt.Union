@@ -1,4 +1,5 @@
-﻿using Coplt.Union;
+﻿using System.Diagnostics.CodeAnalysis;
+using Coplt.Union;
 
 namespace TestSourcePackage;
 
