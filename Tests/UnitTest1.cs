@@ -41,7 +41,7 @@ public class Tests
         Assert.That(u.G, Is.EqualTo((123, "asd")));
 
         u = Union1.MakeA(123);
-        Assert.That(u.B, Is.EqualTo(null));
+        Assert.Throws<NullReferenceException>(() => Console.WriteLine(u.B));
     }
 
 
@@ -81,7 +81,7 @@ public class Tests
         Assert.That(u.G, Is.EqualTo((123, "asd")));
 
         u = Union2.MakeA(123);
-        Assert.That(u.B, Is.EqualTo(null));
+        Assert.Throws<NullReferenceException>(() => Console.WriteLine(u.B));
 
         u.A = 456;
         Assert.That(u.A, Is.EqualTo(456));
