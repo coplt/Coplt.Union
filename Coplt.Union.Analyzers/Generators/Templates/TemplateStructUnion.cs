@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections.Immutable;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 using System.Security.Cryptography;
 using System.Text;
+using Coplt.Analyzers.Generators.Templates;
 using Coplt.Union.Analyzers.Resources;
 using Coplt.Analyzers.Utilities;
 using Microsoft.CodeAnalysis;
@@ -72,12 +74,12 @@ public record struct UnionAttr(string TagsName, bool ExternalTags, string Extern
 public record struct UnionGenerateMethod(bool genToString, bool genEquals, bool genCompareTo);
 
 public class TemplateStructUnion(
-    Coplt.Analyzers.Generators.Templates.GenBase GenBase,
+    GenBase GenBase,
     string Name,
     UnionAttr Attr,
     bool ReadOnly,
     bool IsClass,
-    List<UnionCase> Cases,
+    ImmutableArray<UnionCase> Cases,
     bool AnyGeneric,
     UnionGenerateMethod genMethods) : ATemplate(GenBase)
 {
@@ -157,7 +159,7 @@ public class TemplateStructUnion(
         sb.AppendLine();
         GenImpl(impl_name, tags_name);
 
-        if (Cases.Count > 0)
+        if (Cases.Length > 0)
         {
             sb.AppendLine();
             GenMake(impl_name, tags_name);
@@ -201,8 +203,8 @@ public class TemplateStructUnion(
         var type = Attr.TagsUnderlying;
         if (type == null)
         {
-            if (Cases.Count < byte.MaxValue) type = "byte";
-            else if (Cases.Count < short.MaxValue) type = "short";
+            if (Cases.Length < byte.MaxValue) type = "byte";
+            else if (Cases.Length < short.MaxValue) type = "short";
             else type = "int";
         }
         sb.AppendLine($"{spaces}public enum {name} : {type}");

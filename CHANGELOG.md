@@ -1,4 +1,7 @@
-﻿## 0.12.0
+﻿## 0.12.1
+- Optimize compilation speed
+
+## 0.12.0
 - Breaking Changes
   - Variant getters now return references, no more variant setters
 

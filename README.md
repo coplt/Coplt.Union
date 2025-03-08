@@ -11,6 +11,7 @@
 
 Generate Tagged Union using source generator
 
+- Source distribution, no runtime dependencies
 - All unmanaged types will overlap
 - All classes will overlap
 - Other types are sequential
@@ -21,6 +22,7 @@ Generate Tagged Union using source generator
 [Union]
 public readonly partial struct Union1
 {
+    // This template is not used at runtime, its only purpose is to provide type symbols to the roslyn analyzer
     [UnionTemplate]
     private interface Template
     {
@@ -28,7 +30,7 @@ public readonly partial struct Union1
         string B();
         bool C();
         (int a, int b) D();
-        void E();
+        void E();               // Tag only variant
         List<int>? F();
         (int a, string b) G();
     }
