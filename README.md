@@ -49,7 +49,7 @@ public readonly partial struct Union1
     
     // If the first item is a Tag only, it starts at 0, otherwise it starts at 1
     // Use [UnionTag(value)] to explicitly mark enum values
-    public enum Tags : byte { A = 1, B, C, D, E, F, G }
+    public enum Tags : byte { A = 1, B, C, D, E, F, G, H }
     
     private struct __impl_
     {
