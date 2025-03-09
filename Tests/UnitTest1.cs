@@ -42,6 +42,15 @@ public class Tests
 
         u = Union1.MakeA(123);
         Assert.Throws<NullReferenceException>(() => Console.WriteLine(u.B));
+
+        u = Union1.MakeH(123, 456, "qwe", new(), (789, "asd"));
+        Console.WriteLine(u.H.ToString());
+        Assert.That(u.Tag, Is.EqualTo(Union1.Tags.H));
+        Assert.That(u.H.a, Is.EqualTo(123));
+        Assert.That(u.H.b, Is.EqualTo(456));
+        Assert.That(u.H.c, Is.EqualTo("qwe"));
+        Assert.That(u.H.d.GetType(), Is.EqualTo(typeof(HashSet<int>)));
+        Assert.That(u.H.e, Is.EqualTo((789, "asd")));
     }
 
 

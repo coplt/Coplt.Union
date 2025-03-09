@@ -17,7 +17,6 @@ public partial struct Result<T, E>
         E Err();
     }
 
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator Result<T, E>(OkOf<T> r) => MakeOk(r.Value);
 

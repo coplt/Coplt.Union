@@ -15,6 +15,7 @@ public readonly partial struct Union1
         void E();
         List<int>? F();
         (int a, string b) G();
+        void H(int a, int b, string c, HashSet<int> d, (int a, string b) e);
     }
 }
 
@@ -31,6 +32,7 @@ public partial struct Union2
         void E();
         List<int>? F();
         (int a, string b) G();
+        void H(int a, int b, string c, HashSet<int> d, (int a, string b) e);
     }
 }
 
@@ -77,7 +79,7 @@ public partial struct Union7
     [UnionTemplate]
     private interface Template
     {
-        [UnionTag(123)]
+        [Variant(Tag = 123)]
         int Foo();
     }
 }
@@ -98,6 +100,7 @@ public partial class Union9
         void E();
         List<int>? F();
         (int a, string b) G();
+        void H(int a, int b, string c, HashSet<int> d, (int a, string b) e);
     }
 }
 

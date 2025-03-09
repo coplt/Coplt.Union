@@ -33,4 +33,14 @@
     <data name="Generator.Union.Info.PossiblyInvalidSymbol" xml:space="preserve">
         <value>可能无效的符号，如果生成结果不对请使用 UnionSymbolAttribute 手动指定</value>
     </data>
+    <data name="Generator.Union.Warn.RecordHasReturn" xml:space="preserve">
+        <value>记录模式不能具有返回值
+</value>
+    </data>
+    <data name="Generator.Union.Error.GenericVariant" xml:space="preserve">
+        <value>联合变体不能具有泛型</value>
+    </data>
+    <data name="Generator.Union.Error.ByRef" xml:space="preserve">
+        <value>联合不支持 ByRef</value>
+    </data>
 </root>

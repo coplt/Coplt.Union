@@ -9,23 +9,31 @@ namespace Coplt.Union
     [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class, Inherited = false)]
     internal sealed class UnionAttribute : Attribute
     {
-        /// <summary>Tags name</summary>
+        /// <summary>
+        /// Tags name
+        /// </summary>
         public string TagsName { get; set; } = "Tags";
-        /// <summary>Whether to put Tags outside Union</summary>
+        /// <summary>
+        /// Whether to put Tags outside Union
+        /// </summary>
         public bool ExternalTags { get; set; } = false;
-        /// <summary>Naming format for external Tags, position 0 is the union name</summary>
+        /// <summary>
+        /// Naming format for external Tags, position 0 is the union name
+        /// </summary>
         public string ExternalTagsName { get; set; } = "{0}Tags";
-        /// <summary>The underlying type of the Tags enum, the smallest required type is used by default</summary>
+        /// <summary>
+        /// The underlying type of the Tags enum, the smallest required type is used by default
+        /// </summary>
         public Type? TagsUnderlying { get; set; }
         /// <summary>
         /// Whether to generate override of <see cref="object.ToString()"/>
         /// </summary>
         public bool GenerateToString { get; set; } = true;
 #if NET7_0_OR_GREATER
-    /// <summary>
-    /// Whether to generate override of <see cref="object.Equals(object)"/>, <see cref="object.GetHashCode()"/>,
-    /// and implementation of <see cref="IEquatable{T}"/>, <see cref="System.Numerics.IEqualityOperators{A,B,C}"/>
-    /// </summary>
+        /// <summary>
+        /// Whether to generate override of <see cref="object.Equals(object)"/>, <see cref="object.GetHashCode()"/>,
+        /// and implementation of <see cref="IEquatable{T}"/>, <see cref="System.Numerics.IEqualityOperators{A,B,C}"/>
+        /// </summary>
 #else
         /// <summary>
         /// Whether to generate override of <see cref="object.Equals(object)"/>, <see cref="object.GetHashCode()"/>,
@@ -34,15 +42,27 @@ namespace Coplt.Union
 #endif
         public bool GenerateEquals { get; set; } = true;
 #if NET7_0_OR_GREATER
-    /// <summary>
-    /// Whether to generate implementation of <see cref="IComparable{T}"/>, <see cref="System.Numerics.IComparisonOperators{A,B,C}"/>
-    /// </summary>
+        /// <summary>
+        /// Whether to generate implementation of <see cref="IComparable{T}"/>, <see cref="System.Numerics.IComparisonOperators{A,B,C}"/>
+        /// </summary>
 #else
         /// <summary>
         /// Whether to generate implementation of <see cref="IComparable{T}"/>
         /// </summary>
 #endif
         public bool GenerateCompareTo { get; set; } = true;
+        /// <summary>
+        /// Name if variant is record mode for all variant
+        /// </summary>
+        public string RecordName { get; set; } = "Variant{0}";
+        /// <summary>
+        /// View name if variant is record mode for all variant
+        /// </summary>
+        public string ViewName { get; set; } = "Variant{0}View";
+        /// <summary>
+        /// View only if variant is record mode for all variant
+        /// </summary>
+        public bool ViewOnly { get; set; } = false;
     }
 
     /// <summary>
@@ -52,29 +72,36 @@ namespace Coplt.Union
     internal sealed class UnionTemplateAttribute : Attribute { }
 
     /// <summary>
-    /// UnionTag
+    /// Provide meta for the union variant
     /// </summary>
     [AttributeUsage(AttributeTargets.Method, Inherited = false)]
-    internal sealed class UnionTagAttribute : Attribute
+    internal sealed class VariantAttribute : Attribute
     {
         /// <summary>
-        /// Tag
+        /// Tag enum value 
         /// </summary>
-        public object Tag { get; }
-
+        public object? Tag { get; set; }
         /// <summary>
-        /// UnionTag
+        /// Name if variant is record mode
         /// </summary>
-        public UnionTagAttribute(object tag)
-        {
-            Tag = tag;
-        }
+        public string RecordName { get; set; } = "Variant{0}";
+        /// <summary>
+        /// View name if variant is record mode
+        /// </summary>
+        public string ViewName { get; set; } = "Variant{0}View";
+        /// <summary>
+        /// View only if variant is record mode
+        /// </summary>
+        public bool ViewOnly { get; set; } = false;
     }
 
     /// <summary>
     /// Manually specify symbol semantics
     /// </summary>
-    [AttributeUsage(AttributeTargets.Method | AttributeTargets.Struct | AttributeTargets.Class, Inherited = false)]
+    [AttributeUsage(
+        AttributeTargets.Method | AttributeTargets.Struct | AttributeTargets.Class | AttributeTargets.Parameter,
+        Inherited = false
+    )]
     internal sealed class UnionSymbolAttribute : Attribute
     {
         /// <summary>

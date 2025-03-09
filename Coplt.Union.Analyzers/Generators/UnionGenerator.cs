@@ -16,6 +16,15 @@ namespace Coplt.Union.Analyzers.Generators;
 [Generator]
 public class UnionGenerator : IIncrementalGenerator
 {
+    private static readonly SymbolDisplayFormat TypeDisplayFormat = new(
+        globalNamespaceStyle: SymbolDisplayGlobalNamespaceStyle.Included,
+        typeQualificationStyle: SymbolDisplayTypeQualificationStyle.NameAndContainingTypesAndNamespaces,
+        genericsOptions: SymbolDisplayGenericsOptions.IncludeTypeParameters,
+        miscellaneousOptions:
+        SymbolDisplayMiscellaneousOptions.EscapeKeywordIdentifiers |
+        SymbolDisplayMiscellaneousOptions.UseSpecialTypes |
+        SymbolDisplayMiscellaneousOptions.IncludeNullableReferenceTypeModifier
+    );
     public const string Id = "Union";
     public void Initialize(IncrementalGeneratorInitializationContext context)
     {
@@ -38,14 +47,9 @@ public class UnionGenerator : IIncrementalGenerator
                     .Where(s => s is IMethodSymbol)
                     .Cast<IMethodSymbol>()
                     .Any(s => s.TypeParameters.Length == 0 && s.Parameters.Length == 0);
-                var NamedArguments = attr.NamedArguments.ToDictionary(a => a.Key, a => a.Value);
-                var GenToString = NamedArguments.TryGetValue("GenerateToString", out var _GenerateToString)
-                    ? (bool)_GenerateToString.Value!
-                    : !HasToString;
-                var GenEquals = !NamedArguments.TryGetValue("GenerateEquals", out var _GenerateEquals) ||
-                                (bool)_GenerateEquals.Value!;
-                var GenCompareTo = !NamedArguments.TryGetValue("GenerateCompareTo", out var _GenerateCompareTo) ||
-                                   (bool)_GenerateCompareTo.Value!;
+                var GenToString = union_attr.GenerateToString ?? !HasToString;
+                var GenEquals = union_attr.GenerateEquals;
+                var GenCompareTo = union_attr.GenerateCompareTo;
                 var GenMethods = new UnionGenerateMethod(GenToString, GenEquals, GenCompareTo);
                 var Templates = syntax.Members
                     .Where(static t => t is InterfaceDeclarationSyntax)
@@ -79,69 +83,194 @@ public class UnionGenerator : IIncrementalGenerator
                         if (member is MethodDeclarationSyntax mds)
                         {
                             var case_name = mds.Identifier.ToString();
-                            var ret_type = mds.ReturnType.ToString();
-                            var kind = UnionCaseTypeKind.None;
                             var member_symbol = (IMethodSymbol)semantic_model.GetDeclaredSymbol(mds)!;
-                            var tag_attr = member_symbol.GetAttributes().FirstOrDefault(a =>
-                                a.AttributeClass?.ToDisplayString() == "Coplt.Union.UnionTagAttribute");
+                            var ret_type_symbol = member_symbol.ReturnType;
+                            var is_void = ret_type_symbol.SpecialType == SpecialType.System_Void;
+                            var variant_attr = member_symbol.GetAttributes().FirstOrDefault(a =>
+                                    a.AttributeClass?.ToDisplayString() == "Coplt.Union.VariantAttribute")
+                                ?.NamedArguments
+                                .ToDictionary(a => a.Key, a => a.Value);
                             string? tag = null;
-                            if (tag_attr != null)
+                            if (variant_attr != null && variant_attr.TryGetValue("Tag", out var tag_const))
                             {
-                                tag = tag_attr.ConstructorArguments.First().Value?.ToString();
+                                tag = tag_const.Value?.ToString();
                             }
-                            if (i == 0 && tag == null && ret_type != "void")
+                            if (member_symbol.TypeParameters.Length > 0)
+                            {
+                                var desc = Utils.MakeError(Id, Strings.Get("Generator.Union.Error.GenericVariant"));
+                                diagnostics.Add(Diagnostic.Create(desc, member.GetLocation()));
+                            }
+                            var parameters = member_symbol.Parameters;
+                            var is_record = parameters.Length > 0;
+                            if (is_record && !is_void)
+                            {
+                                var desc = Utils.MakeWarning(Id, Strings.Get("Generator.Union.Warn.RecordHasReturn"));
+                                diagnostics.Add(Diagnostic.Create(desc, mds.ReturnType.GetLocation()));
+                            }
+                            if (i == 0 && tag == null && (is_record || !is_void))
                             {
                                 tag = "1";
                             }
-                            var ret_type_symbol = member_symbol.ReturnType;
-                            var is_generic = ret_type_symbol.IsNotInstGenericType();
-                            if (is_generic) AnyGeneric = true;
-                            if (ret_type_symbol.IsUnmanagedType) kind = UnionCaseTypeKind.Unmanaged;
-                            else if (ret_type_symbol.IsReferenceType) kind = UnionCaseTypeKind.Class;
-                            if (is_generic)
+                            if (!is_record)
                             {
-                                if (!ret_type_symbol.IsReferenceType) kind = UnionCaseTypeKind.None;
-                            }
-                            var symbol_attr = member_symbol.GetAttributes().FirstOrDefault(a =>
-                                a.AttributeClass?.ToDisplayString() == "Coplt.Union.UnionSymbolAttribute");
-                            if (symbol_attr == null)
-                            {
-                                symbol_attr = ret_type_symbol.GetAttributes().FirstOrDefault(a =>
-                                    a.AttributeClass?.ToDisplayString() == "Coplt.Union.UnionSymbolAttribute");
-                            }
-                            if (symbol_attr != null)
-                            {
-                                var args = symbol_attr.NamedArguments.ToDictionary(a => a.Key, a => a.Value);
-                                var symbol_attr_IsUnmanagedType = MayBool.None;
-                                var symbol_attr_IsReferenceType = MayBool.None;
-                                if (args.TryGetValue("IsUnmanagedType", out var _symbol_attr_IsUnmanagedType))
-                                    symbol_attr_IsUnmanagedType = (MayBool)(byte)_symbol_attr_IsUnmanagedType.Value!;
-                                else if (args.TryGetValue("IsReferenceType", out var _symbol_attr_IsReferenceType))
-                                    symbol_attr_IsReferenceType = (MayBool)(byte)_symbol_attr_IsReferenceType.Value!;
-                                if (symbol_attr_IsUnmanagedType is MayBool.True) kind = UnionCaseTypeKind.Unmanaged;
-                                else if (symbol_attr_IsReferenceType is MayBool.True) kind = UnionCaseTypeKind.Class;
+                                var ret_type_name = ret_type_symbol.ToDisplayString(TypeDisplayFormat);
+                                var is_generic = ret_type_symbol.IsNotInstGenericType();
+                                if (is_generic) AnyGeneric = true;
+                                var kind = UnionCaseTypeKind.None;
+                                if (ret_type_symbol.IsUnmanagedType) kind = UnionCaseTypeKind.Unmanaged;
+                                else if (ret_type_symbol.IsReferenceType) kind = UnionCaseTypeKind.Class;
                                 if (is_generic)
                                 {
-                                    if (symbol_attr_IsReferenceType is MayBool.False) kind = UnionCaseTypeKind.None;
+                                    if (!ret_type_symbol.IsReferenceType) kind = UnionCaseTypeKind.None;
                                 }
-                                if (symbol_attr_IsUnmanagedType is MayBool.False && kind is UnionCaseTypeKind.Unmanaged)
-                                    kind = UnionCaseTypeKind.None;
-                                if (symbol_attr_IsReferenceType is MayBool.False && kind is UnionCaseTypeKind.Class)
-                                    kind = UnionCaseTypeKind.None;
-                            }
-                            if (symbol_attr == null)
-                            {
-                                if (ret_type_symbol is not ITypeParameterSymbol &&
-                                    SymbolEqualityComparer.Default.Equals(
-                                        ret_type_symbol.OriginalDefinition.ContainingAssembly,
-                                        compilation.Assembly))
+                                var symbol_attr = member_symbol.GetAttributes().FirstOrDefault(a =>
+                                    a.AttributeClass?.ToDisplayString() == "Coplt.Union.UnionSymbolAttribute");
+                                if (symbol_attr == null)
                                 {
-                                    var desc = Utils.MakeInfo(Id,
-                                        Strings.Get("Generator.Union.Info.PossiblyInvalidSymbol"));
-                                    diagnostics.Add(Diagnostic.Create(desc, member.GetLocation()));
+                                    symbol_attr = ret_type_symbol.GetAttributes().FirstOrDefault(a =>
+                                        a.AttributeClass?.ToDisplayString() == "Coplt.Union.UnionSymbolAttribute");
                                 }
+                                if (symbol_attr != null)
+                                {
+                                    var args = symbol_attr.NamedArguments.ToDictionary(a => a.Key, a => a.Value);
+                                    var symbol_attr_IsUnmanagedType = MayBool.None;
+                                    var symbol_attr_IsReferenceType = MayBool.None;
+                                    if (args.TryGetValue("IsUnmanagedType", out var _symbol_attr_IsUnmanagedType))
+                                        symbol_attr_IsUnmanagedType =
+                                            (MayBool)(byte)_symbol_attr_IsUnmanagedType.Value!;
+                                    else if (args.TryGetValue("IsReferenceType", out var _symbol_attr_IsReferenceType))
+                                        symbol_attr_IsReferenceType =
+                                            (MayBool)(byte)_symbol_attr_IsReferenceType.Value!;
+                                    if (symbol_attr_IsUnmanagedType is MayBool.True) kind = UnionCaseTypeKind.Unmanaged;
+                                    else if (symbol_attr_IsReferenceType is MayBool.True)
+                                        kind = UnionCaseTypeKind.Class;
+                                    if (is_generic)
+                                    {
+                                        if (symbol_attr_IsReferenceType is MayBool.False) kind = UnionCaseTypeKind.None;
+                                    }
+                                    if (symbol_attr_IsUnmanagedType is MayBool.False &&
+                                        kind is UnionCaseTypeKind.Unmanaged)
+                                        kind = UnionCaseTypeKind.None;
+                                    if (symbol_attr_IsReferenceType is MayBool.False && kind is UnionCaseTypeKind.Class)
+                                        kind = UnionCaseTypeKind.None;
+                                }
+                                if (symbol_attr == null)
+                                {
+                                    if (ret_type_symbol is not ITypeParameterSymbol &&
+                                        SymbolEqualityComparer.Default.Equals(
+                                            ret_type_symbol.OriginalDefinition.ContainingAssembly,
+                                            compilation.Assembly))
+                                    {
+                                        var desc = Utils.MakeInfo(Id,
+                                            Strings.Get("Generator.Union.Info.PossiblyInvalidSymbol"));
+                                        diagnostics.Add(Diagnostic.Create(desc, member.GetLocation()));
+                                    }
+                                }
+                                cases.Add(new UnionCase(
+                                    case_name, tag, ret_type_name, kind, is_generic,
+                                    ImmutableArray<RecordItem>.Empty, default
+                                ));
                             }
-                            cases.Add(new UnionCase(case_name, tag, ret_type, kind, is_generic));
+                            else
+                            {
+                                var items = ImmutableArray.CreateBuilder<RecordItem>();
+                                foreach (var parameter in parameters)
+                                {
+                                    if (parameter.RefKind != RefKind.None)
+                                    {
+                                        var desc = Utils.MakeError(Id, Strings.Get("Generator.Union.Error.ByRef"));
+                                        foreach (var location in parameter.Locations)
+                                        {
+                                            diagnostics.Add(Diagnostic.Create(desc, location));
+                                        }
+                                    }
+                                    var type_symbol = parameter.Type;
+                                    var type_name = type_symbol.ToDisplayString(TypeDisplayFormat);
+                                    var arg_name = parameter.Name;
+                                    var is_generic = type_symbol.IsNotInstGenericType();
+                                    var kind = UnionCaseTypeKind.None;
+                                    if (type_symbol.IsUnmanagedType) kind = UnionCaseTypeKind.Unmanaged;
+                                    else if (type_symbol.IsReferenceType) kind = UnionCaseTypeKind.Class;
+                                    if (is_generic)
+                                    {
+                                        if (!type_symbol.IsReferenceType) kind = UnionCaseTypeKind.None;
+                                    }
+                                    var symbol_attr = parameter.GetAttributes().FirstOrDefault(a =>
+                                        a.AttributeClass?.ToDisplayString() == "Coplt.Union.UnionSymbolAttribute");
+                                    if (symbol_attr == null)
+                                    {
+                                        symbol_attr = type_symbol.GetAttributes().FirstOrDefault(a =>
+                                            a.AttributeClass?.ToDisplayString() == "Coplt.Union.UnionSymbolAttribute");
+                                    }
+                                    if (symbol_attr != null)
+                                    {
+                                        var args = symbol_attr.NamedArguments.ToDictionary(a => a.Key, a => a.Value);
+                                        var symbol_attr_IsUnmanagedType = MayBool.None;
+                                        var symbol_attr_IsReferenceType = MayBool.None;
+                                        if (args.TryGetValue("IsUnmanagedType", out var _symbol_attr_IsUnmanagedType))
+                                            symbol_attr_IsUnmanagedType =
+                                                (MayBool)(byte)_symbol_attr_IsUnmanagedType.Value!;
+                                        else if (args.TryGetValue("IsReferenceType",
+                                                     out var _symbol_attr_IsReferenceType))
+                                            symbol_attr_IsReferenceType =
+                                                (MayBool)(byte)_symbol_attr_IsReferenceType.Value!;
+                                        if (symbol_attr_IsUnmanagedType is MayBool.True)
+                                            kind = UnionCaseTypeKind.Unmanaged;
+                                        else if (symbol_attr_IsReferenceType is MayBool.True)
+                                            kind = UnionCaseTypeKind.Class;
+                                        if (is_generic)
+                                        {
+                                            if (symbol_attr_IsReferenceType is MayBool.False)
+                                                kind = UnionCaseTypeKind.None;
+                                        }
+                                        if (symbol_attr_IsUnmanagedType is MayBool.False &&
+                                            kind is UnionCaseTypeKind.Unmanaged)
+                                            kind = UnionCaseTypeKind.None;
+                                        if (symbol_attr_IsReferenceType is MayBool.False &&
+                                            kind is UnionCaseTypeKind.Class)
+                                            kind = UnionCaseTypeKind.None;
+                                    }
+                                    if (symbol_attr == null)
+                                    {
+                                        if (type_symbol is not ITypeParameterSymbol &&
+                                            SymbolEqualityComparer.Default.Equals(
+                                                type_symbol.OriginalDefinition.ContainingAssembly,
+                                                compilation.Assembly))
+                                        {
+                                            var desc = Utils.MakeInfo(Id,
+                                                Strings.Get("Generator.Union.Info.PossiblyInvalidSymbol"));
+                                            foreach (var location in parameter.Locations)
+                                            {
+                                                diagnostics.Add(Diagnostic.Create(desc, location));
+                                            }
+                                        }
+                                    }
+                                    items.Add(new RecordItem(type_name, arg_name, kind, is_generic));
+                                }
+                                var meta = new RecordMeta(
+                                    union_attr.RecordName, union_attr.ViewName, union_attr.ViewOnly
+                                );
+                                if (variant_attr != null)
+                                {
+                                    if (variant_attr.TryGetValue("RecordName", out var RecordNameConst))
+                                    {
+                                        meta.Name = RecordNameConst.Value?.ToString()!;
+                                    }
+                                    if (variant_attr.TryGetValue("ViewName", out var ViewNameConst))
+                                    {
+                                        meta.ViewName = ViewNameConst.Value?.ToString()!;
+                                    }
+                                    if (variant_attr.TryGetValue("ViewOnly", out var ViewOnlyConst))
+                                    {
+                                        if (ViewOnlyConst.Value is bool v)
+                                            meta.ViewOnly = v;
+                                    }
+                                }
+                                cases.Add(new UnionCase(
+                                    case_name, tag, "void", UnionCaseTypeKind.None, false,
+                                    items.ToImmutableArray(), meta
+                                ));
+                            }
                         }
                         else
                         {
@@ -160,7 +289,7 @@ public class UnionGenerator : IIncrementalGenerator
                 }
                 var Name = syntax.Identifier.ToString();
                 return (
-                    Name, UnionAttr: union_attr, IsReadOnly, isClass: IsClass,
+                    Name, symbol.DeclaredAccessibility, UnionAttr: union_attr, IsReadOnly, isClass: IsClass,
                     cases.ToImmutableArray(), AnyGeneric, GenMethods, GenBase,
                     AlwaysEq.Create(diagnostics)
                 );
@@ -169,7 +298,8 @@ public class UnionGenerator : IIncrementalGenerator
 
         context.RegisterSourceOutput(sources, static (ctx, input) =>
         {
-            var (Name, UnionAttr, IsReadOnly, IsClass, Cases, AnyGeneric, GenMethods, GenBase, Diagnostics) = input;
+            var (Name, Accessibility, UnionAttr, IsReadOnly, IsClass, Cases, AnyGeneric, GenMethods, GenBase,
+                Diagnostics) = input;
             if (Diagnostics.Value.Count > 0)
             {
                 foreach (var diagnostic in Diagnostics.Value)
@@ -178,7 +308,7 @@ public class UnionGenerator : IIncrementalGenerator
                 }
             }
             var code = new TemplateStructUnion(
-                GenBase, Name, UnionAttr, IsReadOnly, IsClass, Cases, AnyGeneric, GenMethods
+                GenBase, Name, Accessibility, UnionAttr, IsReadOnly, IsClass, Cases, AnyGeneric, GenMethods
             ).Gen();
             var source_text = SourceText.From(code, Encoding.UTF8);
             var raw_source_file_name = GenBase.FileFullName;

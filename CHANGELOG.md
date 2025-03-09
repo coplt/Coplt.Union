@@ -1,4 +1,9 @@
-﻿## 0.12.1
+﻿## 0.13.0
+- Breaking Changes
+  - Add Record mode
+    - Rewrote layout generation
+
+## 0.12.1
 - Optimize compilation speed
 
 ## 0.12.0

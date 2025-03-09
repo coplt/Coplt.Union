@@ -33,4 +33,13 @@
     <data name="Generator.Union.Info.PossiblyInvalidSymbol" xml:space="preserve">
         <value>Possibly invalid symbols. If the generated result is incorrect, please use UnionSymbolAttribute to specify it manually.</value>
     </data>
+    <data name="Generator.Union.Warn.RecordHasReturn" xml:space="preserve">
+        <value>Record mode cannot have a return value</value>
+    </data>
+    <data name="Generator.Union.Error.GenericVariant" xml:space="preserve">
+        <value>Union variants cannot have generics</value>
+    </data>
+    <data name="Generator.Union.Error.ByRef" xml:space="preserve">
+        <value>Union does not support ByRef</value>
+    </data>
 </root>

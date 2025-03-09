@@ -3,6 +3,8 @@ using Coplt.Union;
 
 #pragma warning disable CS0219
 
+Console.Write("");
+
 var f = new FileStruct();
 
 var a = SomeUnmanaged<int>.MakeFoo(123);
