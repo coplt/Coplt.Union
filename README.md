@@ -56,7 +56,7 @@ public readonly partial struct Union1
         public object? _c0;                 // All classes will overlap
         public object? _c1;
         public __unmanaged_ _u;    // All unmanaged types will overlap
-        public (int a, string b) _f0;        // Mixed types cannot overlap
+        public (int a, string b) _f0_0;        // Mixed types cannot overlap
         public readonly Tags _tag;
         
         [StructLayout(LayoutKind.Explicit)] internal struct __unmanaged_
@@ -174,7 +174,7 @@ public readonly partial struct Union1
         public object? _c0;
         public object? _c1;
         public __unmanaged_ _u;
-        public (int a, string b) _f0;
+        public (int a, string b) _f0_0;
         public readonly Tags _tag;
 
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -183,7 +183,7 @@ public readonly partial struct Union1
             this._c0 = null;
             this._c1 = null;
             global::System.Runtime.CompilerServices.Unsafe.SkipInit(out this._u);
-            this._f0 = default!;
+            this._f0_0 = default!;
             this._tag = _tag;
         }
 
@@ -256,7 +256,7 @@ public readonly partial struct Union1
         public ref readonly (int a, string b) e
         {
             [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-            get => ref global::System.Runtime.CompilerServices.Unsafe.AsRef<Union1.__impl_>(in this._impl)._f0;
+            get => ref global::System.Runtime.CompilerServices.Unsafe.AsRef<Union1.__impl_>(in this._impl)._f0_0;
         }
 
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -355,7 +355,7 @@ public readonly partial struct Union1
     public static Union1 MakeG((int a, string b) value)
     {
         var _impl = new __impl_(Tags.G);
-        _impl._f0 = value;
+        _impl._f0_0 = value;
         return new Union1(_impl);
     }
     [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
@@ -366,7 +366,7 @@ public readonly partial struct Union1
         _impl._u._3._1 = b;
         _impl._c0 = c;
         _impl._c1 = d;
-        _impl._f0 = e;
+        _impl._f0_0 = e;
         return new Union1(_impl);
     }
 
@@ -445,7 +445,7 @@ public readonly partial struct Union1
     public ref readonly (int a, string b) G
     {
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        get => ref !this.IsG ? ref global::System.Runtime.CompilerServices.Unsafe.NullRef<(int a, string b)>() : ref this._impl._f0!;
+        get => ref !this.IsG ? ref global::System.Runtime.CompilerServices.Unsafe.NullRef<(int a, string b)>() : ref this._impl._f0_0!;
     }
     [global::System.Diagnostics.CodeAnalysis.UnscopedRef]
     public ref readonly VariantHView H

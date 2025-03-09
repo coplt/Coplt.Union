@@ -1,9 +1,10 @@
 ﻿using System;
 using Coplt.Union;
+using Coplt.Union.Misc;
 
 namespace Tests;
 
-[Union]
+[Union, UnionSymbol(IsReferenceType = MayBool.True)]
 public partial class Tree
 {
     [UnionTemplate]

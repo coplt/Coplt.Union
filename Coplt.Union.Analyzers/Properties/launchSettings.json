@@ -7,6 +7,10 @@
     "DebugRoslynComponent for Tests": {
       "commandName": "DebugRoslynComponent",
       "targetProject": "..\\Tests\\Tests.csproj"
+    },
+    "DebugRoslynComponent for Utilities": {
+      "commandName": "DebugRoslynComponent",
+      "targetProject": "..\\Coplt.Union.Utilities\\Coplt.Union.Utilities.csproj"
     }
   }
 }

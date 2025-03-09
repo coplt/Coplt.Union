@@ -268,14 +268,14 @@ public class TemplateStructUnion(
         string UnmanagedTypeName,
         List<(string Type, int Index)> UnmanagedFields,
         List<(string Type, int Index, int NthByKind)> ClassFields,
-        List<(string Type, int Index)> OtherFields
+        List<(string Type, int Index, int NthByKind)> OtherFields
     );
 
     private int UnmanagedTypeInc = 0;
     private int OtherTypeInc = 0;
     private int MaxClassTypes = 0;
     private readonly Dictionary<string, int> UnmanagedTypes = new();
-    private readonly Dictionary<string, int> OtherTypes = new();
+    private readonly Dictionary<string, (int Index, int Max)> OtherTypes = new();
     private readonly Dictionary<int, RecordTypeDefine> RecordTypeDefines = new();
 
     private void BuildTypes()
@@ -294,11 +294,11 @@ public class TemplateStructUnion(
                         MaxClassTypes = Math.Max(MaxClassTypes, 1);
                         break;
                     default:
-                        goto OtherType;
+                        if (!OtherTypes.TryGetValue(@case.Type, out var ot))
+                            ot = (OtherTypeInc++, 1);
+                        OtherTypes[@case.Type] = ot;
+                        break;
                 }
-                continue;
-                OtherType:
-                if (!OtherTypes.ContainsKey(@case.Type)) OtherTypes.Add(@case.Type, OtherTypeInc++);
                 continue;
             }
             else
@@ -308,6 +308,7 @@ public class TemplateStructUnion(
                     : $"__record_{i}_unmanaged_";
                 var def = new RecordTypeDefine(unmanaged_struct_name, new(), new(), new());
                 var class_inc = 0;
+                var other_type_max_inc = new Dictionary<string, object>();
                 foreach (var (item, j) in @case.Items.Select(static (a, b) => (a, b)))
                 {
                     switch (item.Kind)
@@ -316,16 +317,29 @@ public class TemplateStructUnion(
                             def.UnmanagedFields.Add((item.Type, j));
                             break;
                         case UnionCaseTypeKind.Class:
+                        {
                             var nth = class_inc++;
                             def.ClassFields.Add((item.Type, j, nth));
                             MaxClassTypes = Math.Max(MaxClassTypes, nth + 1);
                             break;
+                        }
                         default: goto OtherType;
                     }
                     continue;
                     OtherType:
-                    def.OtherFields.Add((item.Type, j));
-                    if (!OtherTypes.ContainsKey(item.Type)) OtherTypes.Add(item.Type, OtherTypeInc++);
+                    if (!other_type_max_inc.TryGetValue(item.Type, out var nth_boxed))
+                    {
+                        nth_boxed = 0;
+                        other_type_max_inc.Add(item.Type, nth_boxed);
+                    }
+                    {
+                        var nth = Unsafe.Unbox<int>(nth_boxed)++;
+                        def.OtherFields.Add((item.Type, j, nth));
+                        if (!OtherTypes.TryGetValue(item.Type, out var ot))
+                            ot = (OtherTypeInc++, 1);
+                        else ot.Max = Math.Max(ot.Max, nth + 1);
+                        OtherTypes[item.Type] = ot;
+                    }
                     continue;
                 }
                 if (def.UnmanagedFields.Count > 0)
@@ -450,15 +464,15 @@ public class TemplateStructUnion(
                     $"{space}    get => ref global::System.Runtime.CompilerServices.Unsafe.As<object?, {type}>(ref {RoImpl}._c{nth});");
                 sb.AppendLine($"{space}}}");
             }
-            foreach (var (type, index) in def.OtherFields)
+            foreach (var (type, index, nth) in def.OtherFields)
             {
-                var ti = OtherTypes[type];
+                var (ti, _) = OtherTypes[type];
                 var item = @case.Items[index];
                 sb.AppendLine($"{space}[global::System.Diagnostics.CodeAnalysis.UnscopedRef]");
                 sb.AppendLine($"{space}public ref{ro} {type} {item.Name}");
                 sb.AppendLine($"{space}{{");
                 sb.AppendLine($"{space}    {AggressiveInlining}");
-                sb.AppendLine($"{space}    get => ref {RoImpl}._f{ti};");
+                sb.AppendLine($"{space}    get => ref {RoImpl}._f{ti}_{nth};");
                 sb.AppendLine($"{space}}}");
             }
 
@@ -668,7 +682,10 @@ public class TemplateStructUnion(
 
         foreach (var kv in OtherTypes)
         {
-            sb.AppendLine($"        public {kv.Key} _f{kv.Value};");
+            for (var i = 0; i < kv.Value.Max; i++)
+            {
+                sb.AppendLine($"        public {kv.Key} _f{kv.Value.Index}_{i};");
+            }
         }
 
         #endregion
@@ -693,7 +710,10 @@ public class TemplateStructUnion(
             sb.AppendLine($"            global::System.Runtime.CompilerServices.Unsafe.SkipInit(out this._u);");
         foreach (var kv in OtherTypes)
         {
-            sb.AppendLine($"            this._f{kv.Value} = default!;");
+            for (var i = 0; i < kv.Value.Max; i++)
+            {
+                sb.AppendLine($"            this._f{kv.Value.Index}_{i} = default!;");
+            }
         }
         sb.AppendLine($"            this._tag = _tag;");
         sb.AppendLine($"        }}");
@@ -797,19 +817,19 @@ public class TemplateStructUnion(
                     var item = @case.Items[index];
                     sb.AppendLine($"{space}_impl._c{nth} = {item.Name};");
                 }
-                foreach (var (type, index) in def.OtherFields)
+                foreach (var (type, index, nth) in def.OtherFields)
                 {
-                    var ti = OtherTypes[type];
+                    var (ti, _) = OtherTypes[type];
                     var item = @case.Items[index];
-                    sb.AppendLine($"{space}_impl._f{ti} = {item.Name};");
+                    sb.AppendLine($"{space}_impl._f{ti}_{nth} = {item.Name};");
                 }
             }
             else if (@case.Type != "void")
             {
                 if (@case.Kind == UnionCaseTypeKind.None)
                 {
-                    var index = OtherTypes![@case.Type];
-                    sb.AppendLine($"{space}_impl._f{index} = value;");
+                    var (index, _) = OtherTypes![@case.Type];
+                    sb.AppendLine($"{space}_impl._f{index}_0 = value;");
                 }
                 else if (@case.Kind == UnionCaseTypeKind.Class)
                 {
@@ -858,8 +878,8 @@ public class TemplateStructUnion(
                 }
                 else if (@case.Kind == UnionCaseTypeKind.None)
                 {
-                    var index = OtherTypes![@case.Type];
-                    sb.Append($"this._impl._f{index}!");
+                    var (index, _) = OtherTypes![@case.Type];
+                    sb.Append($"this._impl._f{index}_0!");
                 }
                 else if (@case.Kind == UnionCaseTypeKind.Class)
                 {
@@ -1024,9 +1044,9 @@ public class TemplateStructUnion(
             {
                 sb.Append(
                     $"        {tags_name}.{@case.Name} => $\"{{nameof({TypeName})}}.{{nameof({tags_name}.{@case.Name})}}");
-                if (@case .Type != "void") sb.Append($" {{{{ {{({Self}.{@case.Name})}} }}}}"); 
+                if (@case.Type != "void") sb.Append($" {{{{ {{({Self}.{@case.Name})}} }}}}");
             }
-          
+
             sb.AppendLine($"\",");
         }
         sb.AppendLine($"        _ => nameof({TypeName}),");

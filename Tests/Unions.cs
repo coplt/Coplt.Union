@@ -109,3 +109,13 @@ public partial class Union10
 {
     public override string ToString() => "Fuck";
 }
+
+[Union]
+public partial class Union11
+{
+    [UnionTemplate]
+    private interface Template
+    {
+        void Foo((float, string) a, (float, string) b, (int, string) c);
+    }
+}
