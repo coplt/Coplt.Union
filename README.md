@@ -55,8 +55,8 @@ public readonly partial struct Union1
     {
         public object? _c0;                 // All classes will overlap
         public object? _c1;
-        public __unmanaged_ _u;    // All unmanaged types will overlap
-        public (int a, string b) _f0_0;        // Mixed types cannot overlap
+        public __unmanaged_ _u;             // All unmanaged types will overlap
+        public (int a, string b) _f0_0;     // Mixed types cannot overlap
         public readonly Tags _tag;
         
         [StructLayout(LayoutKind.Explicit)] internal struct __unmanaged_
