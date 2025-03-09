@@ -8,6 +8,7 @@
         <Version>0.13.0</Version>
         <IsPackable>true</IsPackable>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+        <NoWarn>CS9113</NoWarn>
     </PropertyGroup>
 
     <PropertyGroup>
