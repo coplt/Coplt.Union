@@ -726,7 +726,7 @@ public class TemplateStructUnion(
 
         foreach (var kv_define in RecordTypeDefines)
         {
-            if (kv_define.Value.UnmanagedFields.Count > 1)
+            if (kv_define.Value.UnmanagedFields.Count > 0)
             {
                 var ex_sb = AnyGeneric ? new StringBuilder() : sb;
                 var space = AnyGeneric ? "" : "        ";
