@@ -1,4 +1,7 @@
-﻿## 0.13.0
+﻿## 0.14.0
+- Add record view Deconstruct
+
+## 0.13.0
 - Breaking Changes
   - Add Record mode
     - Rewrote layout generation

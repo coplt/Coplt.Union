@@ -647,6 +647,31 @@ public class TemplateStructUnion(
 
             #endregion
 
+            #region Deconstruct
+
+            if (@case.Items.Length > 0)
+            {
+                sb.AppendLine();
+                sb.AppendLine($"{space}{AggressiveInlining}");
+                sb.Append($"{space}public void Deconstruct(");
+                var _first = true;
+                foreach (var item in @case.Items)
+                {
+                    if (_first) _first = false;
+                    else sb.Append(", ");
+                    sb.Append($"out {item.Type} {item.Name}");
+                }
+                sb.AppendLine($")");
+                sb.AppendLine($"{space}{{");
+                foreach (var item in @case.Items)
+                {
+                    sb.AppendLine($"{space}    {item.Name} = this.{item.Name};");
+                }
+                sb.AppendLine($"{space}}}");
+            }
+
+            #endregion
+
             sb.AppendLine($"    }}");
         }
     }

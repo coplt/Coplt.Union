@@ -29,7 +29,7 @@ public partial class Tree
     public static int Sum2(Tree Tree) => Tree switch
     {
         // no by ref pattern match
-        { IsNode: true, Node: var node } => node.Value + Sum(node.Left) + Sum(node.Right),
+        { IsNode: true, Node: var (value, left, right) } => value + Sum(left) + Sum(right),
         _ => 0,
     };
 }
