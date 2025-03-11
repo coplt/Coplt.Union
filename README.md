@@ -563,6 +563,54 @@ switch (u.Tag)
 
 ## Examples
 
+### Foo
+
+```cs
+// sizeof(Foo) == 16 (8 data, 1 tag, 7 padding)
+[Union]
+public partial struct Foo
+{
+    [UnionTemplate]
+    private interface Template
+    {
+        int A(); 
+        float B();
+        long C();
+        double D();
+    }
+}
+```
+
+### Option
+
+```cs
+[Union]
+public partial struct Option<T>
+{
+    [UnionTemplate]
+    private interface Template
+    {
+        void None();    // tag is 0
+        T Some();
+    }
+}
+```
+
+### Result
+
+```cs
+[Union]
+public partial struct Result<T, E>
+{
+    [UnionTemplate]
+    private interface Template
+    {
+        T Ok();    // tag is 1
+        E Err();
+    }
+}
+```
+
 ### Shape
 
 [F# Shape](https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/discriminated-unions#remarks)
