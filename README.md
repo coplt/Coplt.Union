@@ -5,7 +5,6 @@
 
 - Sera.Union  
   [![Nuget](https://img.shields.io/nuget/v/Coplt.Union)](https://www.nuget.org/packages/Coplt.Union/)
-  [![openupm](https://img.shields.io/npm/v/net.sera.union?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/net.sera.union/)
 - Sera.Union.Utilities  
   [![Nuget](https://img.shields.io/nuget/v/Coplt.Union.Utilities)](https://www.nuget.org/packages/Coplt.Union.Utilities/)  
   Includes `Option<T>` and `Result<T, E>`
