@@ -97,30 +97,29 @@ public readonly partial struct Union1
     
     // ref readonly if sturct is readonly, otherwise ref only
     // If the current tag does not match, a null reference will be returned
-    public ref readonly int A { get; }
-    public ref readonly string B { get; }
-    public ref readonly bool C { get; }
-    public ref readonly (int a, int b) D { get; }
+    public ref readonly int A  => ref _impl._u._0;
+    public ref readonly string B  => ref Unsafe.As<object?, string>(ref _impl._c0);
+    public ref readonly bool C  => ref _impl._u._1;
+    public ref readonly (int a, int b) D  => ref _impl._u._2;
     // E is a Tag only so there is no value getter
-    public ref readonly List<int>? F { get; }
-    public ref readonly (int a, string b) G { get; }
-    // Record mode will get a magic view struct which has some getters to calculate the field references
-    public ref readonly VariantHView H => ref Unsafe.As<__impl_, VariantHView>(ref _impl);
+    public ref readonly List<int>? F  => ref Unsafe.As<object?, List<int>?>(ref _impl._c0);
+    public ref readonly (int a, string b) G  => ref _impl._f0_0;
+    // When gets a record variant, it will get a magic ref struct for forwarding field references
+    public VariantH H => new(ref _impl);
     
     ... Eq Cmp ToString
     
-    // The magic struct, that can use the this reference to compute the actual field reference by reinterpreting __impl_ as this struct
-    public struct VariantHView
+    public readonly ref struct VariantH
     {
-        private readonly __impl_ _impl;
+        private ref readonly __impl_ _impl;
         
-        public ref readonly int a { get; }
-        public ref readonly int b { get; }
-        public ref readonly string c { get; }
-        public ref readonly HashSet<int> d { get; }
-        public ref readonly (int a, string b) e { get; }
+        public ref readonly int a => ref _impl._u._3._0;
+        public ref readonly int b  => ref _impl._u._3._1;
+        public ref readonly string c => ref Unsafe.As<object?, string>(ref _impl._c0);
+        public ref readonly HashSet<int> d  => ref Unsafe.As<object?, HashSet<int>>(ref _impl._c1);
+        public ref readonly (int a, string b) e  => ref _impl._f0_0;
         
-        ...
+        ... Eq Cmp ToString
     }
 }
 ```
@@ -147,14 +146,29 @@ public readonly partial struct Union1
     , global::System.Numerics.IComparisonOperators<Union1, Union1, bool>
     #endif
 {
+    #region Fields
+
     private readonly __impl_ _impl;
+
+    #endregion // Fields
+
+    #region Ctor
+
     private Union1(__impl_ _impl) { this._impl = _impl; }
+
+    #endregion // Ctor
+
+    #region Tag Getter
 
     public readonly Tags Tag
     {
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         get => this._impl._tag;
     }
+
+    #endregion // Tag Getter
+
+    #region Tags
 
     public enum Tags : byte
     {
@@ -167,6 +181,10 @@ public readonly partial struct Union1
         G,
         H,
     }
+
+    #endregion // Tags
+
+    #region Impl
 
     [global::System.Runtime.CompilerServices.CompilerGenerated]
     [global::System.Runtime.InteropServices.StructLayout(global::System.Runtime.InteropServices.LayoutKind.Auto)]
@@ -211,57 +229,66 @@ public readonly partial struct Union1
         }
     }
 
-    public partial record struct VariantH(int a, int b, string c, global::System.Collections.Generic.HashSet<int> d, (int a, string b) e);
+    #endregion // Impl
 
-    public readonly struct VariantHView : 
-        global::System.IEquatable<VariantHView>
-        , global::System.IComparable<VariantHView>
-        #if NET7_0_OR_GREATER
-        , global::System.Numerics.IEqualityOperators<VariantHView, VariantHView, bool>
-        , global::System.Numerics.IComparisonOperators<VariantHView, VariantHView, bool>
+    #region Views
+
+    public readonly ref struct VariantH
+        #if NET9_0_OR_GREATER
+        : global::System.IEquatable<VariantH>
+        , global::System.IComparable<VariantH>
         #endif
     {
-        private readonly __impl_ _impl;
+        #region Fields
+
+        private readonly ref readonly __impl_ _impl;
+
+        #endregion // Fields
+
+        #region Ctor
 
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public VariantHView()
+        internal VariantH(ref readonly __impl_ impl)
         {
-            _impl = new __impl_(Tags.H);
+            _impl = ref impl;
         }
 
-        [global::System.Diagnostics.CodeAnalysis.UnscopedRef]
+        #endregion // Ctor
+
+        #region Getter
+
         public ref readonly int a
         {
             [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get => ref global::System.Runtime.CompilerServices.Unsafe.AsRef<Union1.__impl_>(in this._impl)._u._3._0;
         }
-        [global::System.Diagnostics.CodeAnalysis.UnscopedRef]
         public ref readonly int b
         {
             [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get => ref global::System.Runtime.CompilerServices.Unsafe.AsRef<Union1.__impl_>(in this._impl)._u._3._1;
         }
-        [global::System.Diagnostics.CodeAnalysis.UnscopedRef]
         public ref readonly string c
         {
             [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get => ref global::System.Runtime.CompilerServices.Unsafe.As<object?, string>(ref global::System.Runtime.CompilerServices.Unsafe.AsRef<Union1.__impl_>(in this._impl)._c0);
         }
-        [global::System.Diagnostics.CodeAnalysis.UnscopedRef]
         public ref readonly global::System.Collections.Generic.HashSet<int> d
         {
             [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get => ref global::System.Runtime.CompilerServices.Unsafe.As<object?, global::System.Collections.Generic.HashSet<int>>(ref global::System.Runtime.CompilerServices.Unsafe.AsRef<Union1.__impl_>(in this._impl)._c1);
         }
-        [global::System.Diagnostics.CodeAnalysis.UnscopedRef]
         public ref readonly (int a, string b) e
         {
             [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
             get => ref global::System.Runtime.CompilerServices.Unsafe.AsRef<Union1.__impl_>(in this._impl)._f0_0;
         }
 
+        #endregion // Getter
+
+        #region Equals
+
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public bool Equals(VariantHView other) =>
+        public bool Equals(scoped VariantH other) =>
             global::System.Collections.Generic.EqualityComparer<int>.Default.Equals(a, other.a) &&
             global::System.Collections.Generic.EqualityComparer<int>.Default.Equals(b, other.b) &&
             global::System.Collections.Generic.EqualityComparer<string>.Default.Equals(c, other.c) &&
@@ -272,15 +299,19 @@ public readonly partial struct Union1
         public override int GetHashCode() => global::System.HashCode.Combine(a, b, c, d, e);
 
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public override bool Equals(object? obj) => obj is VariantHView other && Equals(other);
+        public override bool Equals(object? obj) => false;
 
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool operator ==(VariantHView left, VariantHView right) => Equals(left, right);
+        public static bool operator ==(scoped VariantH left, scoped VariantH right) => left.Equals(right);
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool operator !=(VariantHView left, VariantHView right) => !Equals(left, right);
+        public static bool operator !=(scoped VariantH left, scoped VariantH right) => !left.Equals(right);
+
+        #endregion // Equals
+
+        #region CompareTo
 
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public int CompareTo(VariantHView other)
+        public int CompareTo(scoped VariantH other)
         {
             var _0 = global::System.Collections.Generic.Comparer<int>.Default.Compare(a, other.a);
             if (_0 != 0) return _0;
@@ -296,20 +327,41 @@ public readonly partial struct Union1
         }
 
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool operator <(VariantHView left, VariantHView right) => left.CompareTo(right) < 0;
+        public static bool operator <(scoped VariantH left, scoped VariantH right) => left.CompareTo(right) < 0;
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool operator >(VariantHView left, VariantHView right) => left.CompareTo(right) > 0;
+        public static bool operator >(scoped VariantH left, scoped VariantH right) => left.CompareTo(right) > 0;
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool operator <=(VariantHView left, VariantHView right) => left.CompareTo(right) <= 0;
+        public static bool operator <=(scoped VariantH left, scoped VariantH right) => left.CompareTo(right) <= 0;
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static bool operator >=(VariantHView left, VariantHView right) => left.CompareTo(right) >= 0;
+        public static bool operator >=(scoped VariantH left, scoped VariantH right) => left.CompareTo(right) >= 0;
+
+        #endregion // CompareTo
+
+        #region ToString
 
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         public override string ToString() => $"{nameof(Union1)}.{nameof(Tags.H)} {{ a = {a}, b = {b}, c = {c}, d = {d}, e = {e} }}";
 
+        #endregion // ToString
+
+        #region Deconstruct
+
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        public static implicit operator VariantH(VariantHView v) => new VariantH(v.a, v.b, v.c, v.d, v.e);
+        public void Deconstruct(out int a, out int b, out string c, out global::System.Collections.Generic.HashSet<int> d, out (int a, string b) e)
+        {
+            a = this.a;
+            b = this.b;
+            c = this.c;
+            d = this.d;
+            e = this.e;
+        }
+
+        #endregion // Deconstruct
     }
+
+    #endregion // Views
+
+    #region Make
 
     [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     public static Union1 MakeA(int value)
@@ -318,6 +370,7 @@ public readonly partial struct Union1
         _impl._u._0 = value;
         return new Union1(_impl);
     }
+
     [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     public static Union1 MakeB(string value)
     {
@@ -325,6 +378,7 @@ public readonly partial struct Union1
         _impl._c0 = value;
         return new Union1(_impl);
     }
+
     [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     public static Union1 MakeC(bool value)
     {
@@ -332,6 +386,7 @@ public readonly partial struct Union1
         _impl._u._1 = value;
         return new Union1(_impl);
     }
+
     [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     public static Union1 MakeD((int a, int b) value)
     {
@@ -339,12 +394,14 @@ public readonly partial struct Union1
         _impl._u._2 = value;
         return new Union1(_impl);
     }
+
     [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     public static Union1 MakeE()
     {
         var _impl = new __impl_(Tags.E);
         return new Union1(_impl);
     }
+
     [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     public static Union1 MakeF(global::System.Collections.Generic.List<int>? value)
     {
@@ -352,6 +409,7 @@ public readonly partial struct Union1
         _impl._c0 = value;
         return new Union1(_impl);
     }
+
     [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     public static Union1 MakeG((int a, string b) value)
     {
@@ -359,6 +417,7 @@ public readonly partial struct Union1
         _impl._f0_0 = value;
         return new Union1(_impl);
     }
+
     [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     public static Union1 MakeH(int a, int b, string c, global::System.Collections.Generic.HashSet<int> d, (int a, string b) e)
     {
@@ -371,46 +430,61 @@ public readonly partial struct Union1
         return new Union1(_impl);
     }
 
+    #endregion // Make
+
+    #region Is
+
     public readonly bool IsA
     {
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         get => this._impl._tag == Tags.A;
     }
+
     public readonly bool IsB
     {
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         get => this._impl._tag == Tags.B;
     }
+
     public readonly bool IsC
     {
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         get => this._impl._tag == Tags.C;
     }
+
     public readonly bool IsD
     {
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         get => this._impl._tag == Tags.D;
     }
+
     public readonly bool IsE
     {
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         get => this._impl._tag == Tags.E;
     }
+
     public readonly bool IsF
     {
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         get => this._impl._tag == Tags.F;
     }
+
     public readonly bool IsG
     {
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         get => this._impl._tag == Tags.G;
     }
+
     public readonly bool IsH
     {
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         get => this._impl._tag == Tags.H;
     }
+
+    #endregion // Is
+
+    #region Getter
 
     [global::System.Diagnostics.CodeAnalysis.UnscopedRef]
     public ref readonly int A
@@ -418,42 +492,52 @@ public readonly partial struct Union1
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         get => ref !this.IsA ? ref global::System.Runtime.CompilerServices.Unsafe.NullRef<int>() : ref this._impl._u._0!;
     }
+
     [global::System.Diagnostics.CodeAnalysis.UnscopedRef]
     public ref readonly string B
     {
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         get => ref !this.IsB ? ref global::System.Runtime.CompilerServices.Unsafe.NullRef<string>() : ref global::System.Runtime.CompilerServices.Unsafe.As<object?, string>(ref global::System.Runtime.CompilerServices.Unsafe.AsRef<Union1.__impl_>(in this._impl)._c0);
     }
+
     [global::System.Diagnostics.CodeAnalysis.UnscopedRef]
     public ref readonly bool C
     {
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         get => ref !this.IsC ? ref global::System.Runtime.CompilerServices.Unsafe.NullRef<bool>() : ref this._impl._u._1!;
     }
+
     [global::System.Diagnostics.CodeAnalysis.UnscopedRef]
     public ref readonly (int a, int b) D
     {
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         get => ref !this.IsD ? ref global::System.Runtime.CompilerServices.Unsafe.NullRef<(int a, int b)>() : ref this._impl._u._2!;
     }
+
     [global::System.Diagnostics.CodeAnalysis.UnscopedRef]
     public ref readonly global::System.Collections.Generic.List<int>? F
     {
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         get => ref !this.IsF ? ref global::System.Runtime.CompilerServices.Unsafe.NullRef<global::System.Collections.Generic.List<int>?>() : ref global::System.Runtime.CompilerServices.Unsafe.As<object?, global::System.Collections.Generic.List<int>?>(ref global::System.Runtime.CompilerServices.Unsafe.AsRef<Union1.__impl_>(in this._impl)._c0);
     }
+
     [global::System.Diagnostics.CodeAnalysis.UnscopedRef]
     public ref readonly (int a, string b) G
     {
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
         get => ref !this.IsG ? ref global::System.Runtime.CompilerServices.Unsafe.NullRef<(int a, string b)>() : ref this._impl._f0_0!;
     }
+
     [global::System.Diagnostics.CodeAnalysis.UnscopedRef]
-    public ref readonly VariantHView H
+    public VariantH H
     {
         [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-        get => ref !this.IsH ? ref global::System.Runtime.CompilerServices.Unsafe.NullRef<VariantHView>() : ref global::System.Runtime.CompilerServices.Unsafe.As<__impl_, VariantHView>(ref global::System.Runtime.CompilerServices.Unsafe.AsRef<Union1.__impl_>(in this._impl));
+        get => !this.IsH ? throw new global::System.NullReferenceException() : new VariantH(ref global::System.Runtime.CompilerServices.Unsafe.AsRef<Union1.__impl_>(in this._impl));
     }
+
+    #endregion // Getter
+
+    #region Equals
 
     [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     public readonly bool Equals(Union1 other) => this.Tag != other.Tag ? false : this.Tag switch
@@ -477,7 +561,7 @@ public readonly partial struct Union1
         Tags.D => global::System.HashCode.Combine(this.Tag, this.D),
         Tags.F => global::System.HashCode.Combine(this.Tag, this.F),
         Tags.G => global::System.HashCode.Combine(this.Tag, this.G),
-        Tags.H => global::System.HashCode.Combine(this.Tag, this.H),
+        Tags.H => global::System.HashCode.Combine(this.Tag, this.H.GetHashCode()),
         _ => global::System.HashCode.Combine(this.Tag),
     };
 
@@ -485,9 +569,13 @@ public readonly partial struct Union1
     public readonly override bool Equals(object? obj) => obj is Union1 other && Equals(other);
 
     [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    public static bool operator ==(Union1 left, Union1 right) => Equals(left, right);
+    public static bool operator ==(Union1 left, Union1 right) => left.Equals(right);
     [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    public static bool operator !=(Union1 left, Union1 right) => !Equals(left, right);
+    public static bool operator !=(Union1 left, Union1 right) => !left.Equals(right);
+
+    #endregion // Equals
+
+    #region CompareTo
 
     [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     public readonly int CompareTo(Union1 other) => this.Tag != other.Tag ? global::System.Collections.Generic.Comparer<Tags>.Default.Compare(this.Tag, other.Tag) : this.Tag switch
@@ -511,6 +599,10 @@ public readonly partial struct Union1
     [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     public static bool operator >=(Union1 left, Union1 right) => left.CompareTo(right) >= 0;
 
+    #endregion // CompareTo
+
+    #region ToString
+
     [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
     public readonly override string ToString() => this.Tag switch
     {
@@ -521,9 +613,11 @@ public readonly partial struct Union1
         Tags.E => $"{nameof(Union1)}.{nameof(Tags.E)}",
         Tags.F => $"{nameof(Union1)}.{nameof(Tags.F)} {{ {(this.F)} }}",
         Tags.G => $"{nameof(Union1)}.{nameof(Tags.G)} {{ {(this.G)} }}",
-        Tags.H => $"{(this.H)}",
+        Tags.H => $"{(this.H.ToString())}",
         _ => nameof(Union1),
     };
+
+    #endregion // ToString
 }
 ```
 
