@@ -52,17 +52,9 @@ namespace Coplt.Union
 #endif
         public bool GenerateCompareTo { get; set; } = true;
         /// <summary>
-        /// Name if variant is record mode for all variant
-        /// </summary>
-        public string RecordName { get; set; } = "Variant{0}";
-        /// <summary>
         /// View name if variant is record mode for all variant
         /// </summary>
-        public string ViewName { get; set; } = "Variant{0}View";
-        /// <summary>
-        /// View only if variant is record mode for all variant
-        /// </summary>
-        public bool ViewOnly { get; set; } = false;
+        public string ViewName { get; set; } = "Variant{0}";
     }
 
     /// <summary>
@@ -82,17 +74,9 @@ namespace Coplt.Union
         /// </summary>
         public object? Tag { get; set; }
         /// <summary>
-        /// Name if variant is record mode
-        /// </summary>
-        public string RecordName { get; set; } = "Variant{0}";
-        /// <summary>
         /// View name if variant is record mode
         /// </summary>
-        public string ViewName { get; set; } = "Variant{0}View";
-        /// <summary>
-        /// View only if variant is record mode
-        /// </summary>
-        public bool ViewOnly { get; set; } = false;
+        public string ViewName { get; set; } = "Variant{0}";
     }
 
     /// <summary>

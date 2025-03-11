@@ -1,4 +1,9 @@
-﻿## 0.14.0
+﻿## 0.15.0
+- Breaking Changes
+  - Record mode no longer generates record structures, only view structures
+  - View structs now generate ref structs on runtimes that support ref structs
+
+## 0.14.0
 - Add record view Deconstruct
 
 ## 0.13.0

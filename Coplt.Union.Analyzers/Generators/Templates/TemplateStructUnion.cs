@@ -23,7 +23,7 @@ public enum UnionCaseTypeKind
     Class
 }
 
-public record struct RecordMeta(string Name, string ViewName, bool ViewOnly);
+public record struct RecordMeta(string ViewName);
 
 public record struct RecordItem(
     string Type,
@@ -53,17 +53,14 @@ public record struct UnionAttr(
     bool? GenerateToString,
     bool GenerateEquals,
     bool GenerateCompareTo,
-    string RecordName,
-    string ViewName,
-    bool ViewOnly
+    string ViewName
 )
 {
     public static UnionAttr FromData(AttributeData data, List<Diagnostic> diagnostics)
     {
         var a = new UnionAttr(
             "Tags", false, "{0}Tags", null,
-            null, true, true,
-            "Variant{0}", "Variant{0}View", false
+            null, true, true, "Variant{0}"
         );
         foreach (var kv in data.NamedArguments)
         {
@@ -109,14 +106,8 @@ public record struct UnionAttr(
                 case "GenerateCompareTo":
                     a.GenerateCompareTo = (bool)kv.Value.Value!;
                     break;
-                case "RecordName":
-                    a.RecordName = (string)kv.Value.Value!;
-                    break;
                 case "ViewName":
                     a.ViewName = (string)kv.Value.Value!;
-                    break;
-                case "ViewOnly":
-                    a.ViewOnly = (bool)kv.Value.Value!;
                     break;
             }
         }
@@ -135,7 +126,8 @@ public class TemplateStructUnion(
     bool IsClass,
     ImmutableArray<UnionCase> Cases,
     bool AnyGeneric,
-    UnionGenerateMethod GenMethods
+    UnionGenerateMethod GenMethods,
+    bool SupportByRefFields
 ) : ATemplate(GenBase)
 {
     public const string AggressiveInlining =
@@ -207,15 +199,28 @@ public class TemplateStructUnion(
         }
         sb.AppendLine("{");
 
+        sb.AppendLine($"    #region Fields");
+        sb.AppendLine();
         sb.AppendLine(ReadOnly ? $"    private{@readonly} {impl_name} _impl;" : $"    private {impl_name} _impl;");
+        sb.AppendLine();
+        sb.AppendLine($"    #endregion // Fields");
+        sb.AppendLine();
+        sb.AppendLine($"    #region Ctor");
+        sb.AppendLine();
         sb.AppendLine($"    private {Name}({impl_name} _impl) {{ this._impl = _impl; }}");
+        sb.AppendLine();
+        sb.AppendLine($"    #endregion // Ctor");
 
+        sb.AppendLine();
+        sb.AppendLine($"    #region Tag Getter");
         sb.AppendLine();
         sb.AppendLine($"    public{@readonly} {tags_name} Tag");
         sb.AppendLine($"    {{");
         sb.AppendLine($"        {AggressiveInlining}");
         sb.AppendLine($"        get => this._impl._tag;");
         sb.AppendLine($"    }}");
+        sb.AppendLine();
+        sb.AppendLine($"    #endregion // Tag Getter");
 
         if (!Attr.ExternalTags)
         {
@@ -223,26 +228,21 @@ public class TemplateStructUnion(
             GenTags(tags_name);
         }
 
-        sb.AppendLine();
         GenImpl(impl_name, tags_name);
 
-        GenRecords();
-        GenViews(impl_name, tags_name);
+        if (SupportByRefFields) GenRefViews(impl_name, tags_name);
+        else GenValueViews(impl_name, tags_name);
 
         if (Cases.Length > 0)
         {
-            sb.AppendLine();
             GenMake(impl_name, tags_name);
 
-            sb.AppendLine();
             GenIs(tags_name);
 
-            sb.AppendLine();
             GenGetter(impl_name);
         }
         else
         {
-            sb.AppendLine();
             GenMakeEmpty();
         }
 
@@ -353,6 +353,8 @@ public class TemplateStructUnion(
 
     private void GenTags(string name, string spaces = "    ")
     {
+        sb.AppendLine($"    #region Tags");
+        sb.AppendLine();
         var type = Attr.TagsUnderlying;
         if (type == null)
         {
@@ -369,34 +371,11 @@ public class TemplateStructUnion(
             sb.AppendLine(",");
         }
         sb.AppendLine($"{spaces}}}");
+        sb.AppendLine();
+        sb.AppendLine($"    #endregion // Tags");
     }
 
-    private void GenRecords()
-    {
-        var first = true;
-        foreach (var @case in Cases)
-        {
-            if (!@case.IsRecord) continue;
-            var meta = @case.Meta;
-            if (meta.ViewOnly) continue;
-            if (first)
-            {
-                sb.AppendLine();
-                first = false;
-            }
-            sb.Append($"    public partial record struct {string.Format(meta.Name, @case.Name)}(");
-            var first_ = true;
-            foreach (var item in @case.Items)
-            {
-                if (first_) first_ = false;
-                else sb.Append($", ");
-                sb.Append($"{item.Type} {item.Name}");
-            }
-            sb.AppendLine($");");
-        }
-    }
-
-    private void GenViews(string impl_name, string tags_name)
+    private void GenValueViews(string impl_name, string tags_name)
     {
         var ro = ReadOnly ? " readonly" : "";
 
@@ -407,11 +386,12 @@ public class TemplateStructUnion(
             if (first)
             {
                 sb.AppendLine();
+                sb.AppendLine($"    #region Views");
+                sb.AppendLine();
                 first = false;
             }
             var meta = @case.Meta;
             var space = "        ";
-            var record_name = string.Format(meta.Name, @case.Name);
             var view_name = string.Format(meta.ViewName, @case.Name);
             sb.AppendLine($"    public{ro} struct {view_name} : ");
             sb.AppendLine($"{space}global::System.IEquatable<{view_name}>");
@@ -541,10 +521,10 @@ public class TemplateStructUnion(
 
             sb.AppendLine($"{space}{AggressiveInlining}");
             sb.AppendLine(
-                $"{space}public static bool operator ==({view_name} left, {view_name} right) => Equals(left, right);");
+                $"{space}public static bool operator ==({view_name} left, {view_name} right) => left.Equals(right);");
             sb.AppendLine($"{space}{AggressiveInlining}");
             sb.AppendLine(
-                $"{space}public static bool operator !=({view_name} left, {view_name} right) => !Equals(left, right);");
+                $"{space}public static bool operator !=({view_name} left, {view_name} right) => !left.Equals(right);");
 
             #endregion
 
@@ -612,41 +592,6 @@ public class TemplateStructUnion(
 
             #endregion
 
-            #region Convert
-
-            if (!meta.ViewOnly)
-            {
-                {
-                    sb.AppendLine();
-                    sb.AppendLine($"{space}{AggressiveInlining}");
-                    sb.Append(
-                        $"{space}public static implicit operator {record_name}({view_name} v) => new {record_name}(");
-                    var _first = true;
-                    foreach (var item in @case.Items)
-                    {
-                        if (_first) _first = false;
-                        else sb.Append(", ");
-                        sb.Append($"v.{item.Name}");
-                    }
-                    sb.AppendLine($");");
-                }
-                if (!ReadOnly)
-                {
-                    sb.AppendLine();
-                    sb.AppendLine($"{space}{AggressiveInlining}");
-                    sb.AppendLine(
-                        $"{space}public static implicit operator {view_name}({record_name} v) => new {view_name}");
-                    sb.AppendLine($"{space}{{");
-                    foreach (var item in @case.Items)
-                    {
-                        sb.AppendLine($"{space}    {item.Name} = v.{item.Name},");
-                    }
-                    sb.AppendLine($"{space}}};");
-                }
-            }
-
-            #endregion
-
             #region Deconstruct
 
             if (@case.Items.Length > 0)
@@ -674,10 +619,299 @@ public class TemplateStructUnion(
 
             sb.AppendLine($"    }}");
         }
+
+        if (!first)
+        {
+            sb.AppendLine();
+            sb.AppendLine($"    #endregion // Views");
+        }
+    }
+
+    private void GenRefViews(string impl_name, string tags_name)
+    {
+        var ro = ReadOnly ? " readonly" : "";
+
+        var first = true;
+        foreach (var (@case, i) in Cases.Select(static (a, b) => (a, b)))
+        {
+            if (!@case.IsRecord) continue;
+            if (first)
+            {
+                sb.AppendLine();
+                sb.AppendLine($"    #region Views");
+                sb.AppendLine();
+                first = false;
+            }
+            var meta = @case.Meta;
+            var space = "        ";
+            var view_name = string.Format(meta.ViewName, @case.Name);
+            sb.AppendLine($"    public readonly ref struct {view_name}");
+            sb.AppendLine($"{space}#if NET9_0_OR_GREATER");
+            sb.AppendLine($"{space}: global::System.IEquatable<{view_name}>");
+            sb.AppendLine($"{space}, global::System.IComparable<{view_name}>");
+            // sb.AppendLine($"{space}, global::System.Numerics.IEqualityOperators<{view_name}, {view_name}, bool>");
+            // sb.AppendLine($"{space}, global::System.Numerics.IComparisonOperators<{view_name}, {view_name}, bool>");
+            sb.AppendLine($"{space}#endif");
+            sb.AppendLine($"    {{");
+            sb.AppendLine($"{space}#region Fields");
+            sb.AppendLine();
+            sb.AppendLine($"{space}private readonly ref{ro} {impl_name} _impl;");
+            sb.AppendLine();
+            sb.AppendLine($"{space}#endregion // Fields");
+
+            #region Ctor
+
+            sb.AppendLine();
+            sb.AppendLine($"{space}#region Ctor");
+            sb.AppendLine();
+            sb.AppendLine($"{space}{AggressiveInlining}");
+            sb.AppendLine(
+                $"{space}internal {view_name}(ref{ro} {impl_name} impl)");
+            sb.AppendLine($"{space}{{");
+            sb.AppendLine($"{space}    _impl = ref impl;");
+            sb.AppendLine($"{space}}}");
+            sb.AppendLine();
+            sb.AppendLine($"{space}#endregion // Ctor");
+
+            #endregion
+
+            #region Getter
+
+            sb.AppendLine();
+            sb.AppendLine($"{space}#region Getter");
+            sb.AppendLine();
+            var def = RecordTypeDefines[i];
+            if (def.UnmanagedFields.Count > 0)
+            {
+                var uti = UnmanagedTypes[def.UnmanagedTypeName];
+                foreach (var (type, index) in def.UnmanagedFields)
+                {
+                    var item = @case.Items[index];
+                    sb.AppendLine($"{space}public ref{ro} {type} {item.Name}");
+                    sb.AppendLine($"{space}{{");
+                    sb.AppendLine($"{space}    {AggressiveInlining}");
+                    sb.AppendLine($"{space}    get => ref {RoImpl}._u._{uti}._{index};");
+                    sb.AppendLine($"{space}}}");
+                }
+            }
+            foreach (var (type, index, nth) in def.ClassFields)
+            {
+                var item = @case.Items[index];
+                sb.AppendLine($"{space}public ref{ro} {type} {item.Name}");
+                sb.AppendLine($"{space}{{");
+                sb.AppendLine($"{space}    {AggressiveInlining}");
+                sb.AppendLine(
+                    $"{space}    get => ref global::System.Runtime.CompilerServices.Unsafe.As<object?, {type}>(ref {RoImpl}._c{nth});");
+                sb.AppendLine($"{space}}}");
+            }
+            foreach (var (type, index, nth) in def.OtherFields)
+            {
+                var (ti, _) = OtherTypes[type];
+                var item = @case.Items[index];
+                sb.AppendLine($"{space}public ref{ro} {type} {item.Name}");
+                sb.AppendLine($"{space}{{");
+                sb.AppendLine($"{space}    {AggressiveInlining}");
+                sb.AppendLine($"{space}    get => ref {RoImpl}._f{ti}_{nth};");
+                sb.AppendLine($"{space}}}");
+            }
+            sb.AppendLine();
+            sb.AppendLine($"{space}#endregion // Getter");
+
+            #endregion
+
+            #region Equatable
+
+            sb.AppendLine();
+            sb.AppendLine($"{space}#region Equals");
+
+            #region Equals
+
+            sb.AppendLine();
+            sb.AppendLine($"{space}{AggressiveInlining}");
+            sb.Append($"{space}public bool Equals(scoped {view_name} other) =>\n{space}    ");
+            {
+                var _first = true;
+                foreach (var item in @case.Items)
+                {
+                    if (_first) _first = false;
+                    else sb.Append($" &&\n{space}    ");
+                    sb.Append(
+                        $"global::System.Collections.Generic.EqualityComparer<{item.Type}>.Default.Equals({item.Name}, other.{item.Name})");
+                }
+            }
+            sb.AppendLine($";");
+
+            #endregion
+
+            #region HashCode
+
+            sb.AppendLine();
+            sb.AppendLine($"{space}{AggressiveInlining}");
+            if (@case.Items.Length < 8)
+            {
+                sb.Append($"{space}public override int GetHashCode() => global::System.HashCode.Combine(");
+                var _first = true;
+                foreach (var item in @case.Items)
+                {
+                    if (_first) _first = false;
+                    else sb.Append($", ");
+                    sb.Append($"{item.Name}");
+                }
+                sb.AppendLine($");");
+            }
+            else
+            {
+                sb.AppendLine($"{space}public override int GetHashCode()");
+                sb.AppendLine($"{space}{{");
+                sb.AppendLine($"{space}    var hasher = new global::System.HashCode();");
+                foreach (var item in @case.Items)
+                {
+                    sb.AppendLine($"{space}    hasher.Add({item.Name});");
+                }
+                sb.AppendLine($"{space}    return hasher.ToHashCode();");
+                sb.AppendLine($"{space}}}");
+            }
+
+            #endregion
+
+            #region other
+
+            sb.AppendLine();
+            sb.AppendLine($"{space}{AggressiveInlining}");
+            sb.AppendLine(
+                $"{space}public override bool Equals(object? obj) => false;");
+
+            sb.AppendLine();
+            sb.AppendLine($"{space}{AggressiveInlining}");
+            sb.AppendLine(
+                $"{space}public static bool operator ==(scoped {view_name} left, scoped {view_name} right) => left.Equals(right);");
+            sb.AppendLine($"{space}{AggressiveInlining}");
+            sb.AppendLine(
+                $"{space}public static bool operator !=(scoped {view_name} left, scoped {view_name} right) => !left.Equals(right);");
+
+            #endregion
+
+            sb.AppendLine();
+            sb.AppendLine($"{space}#endregion // Equals");
+
+            #endregion
+
+            #region Comparable
+
+            sb.AppendLine();
+            sb.AppendLine($"{space}#region CompareTo");
+
+            #region CompareTo
+
+            sb.AppendLine();
+            sb.AppendLine($"{space}{AggressiveInlining}");
+            sb.AppendLine($"{space}public int CompareTo(scoped {view_name} other)");
+            sb.AppendLine($"{space}{{");
+            {
+                for (var n = 0; n < @case.Items.Length; n++)
+                {
+                    var item = @case.Items[n];
+                    sb.AppendLine(
+                        $"{space}    var _{n} = global::System.Collections.Generic.Comparer<{item.Type}>.Default.Compare({item.Name}, other.{item.Name});");
+
+                    sb.AppendLine($"{space}    if (_{n} != 0) return _{n};");
+                }
+            }
+            sb.AppendLine($"{space}    return 0;");
+            sb.AppendLine($"{space}}}");
+
+            #endregion
+
+            #region other
+
+            sb.AppendLine();
+            sb.AppendLine($"{space}{AggressiveInlining}");
+            sb.AppendLine(
+                $"{space}public static bool operator <(scoped {view_name} left, scoped {view_name} right) => left.CompareTo(right) < 0;");
+            sb.AppendLine($"{space}{AggressiveInlining}");
+            sb.AppendLine(
+                $"{space}public static bool operator >(scoped {view_name} left, scoped {view_name} right) => left.CompareTo(right) > 0;");
+            sb.AppendLine($"{space}{AggressiveInlining}");
+            sb.AppendLine(
+                $"{space}public static bool operator <=(scoped {view_name} left, scoped {view_name} right) => left.CompareTo(right) <= 0;");
+            sb.AppendLine($"{space}{AggressiveInlining}");
+            sb.AppendLine(
+                $"{space}public static bool operator >=(scoped {view_name} left, scoped {view_name} right) => left.CompareTo(right) >= 0;");
+
+            #endregion
+
+            sb.AppendLine();
+            sb.AppendLine($"{space}#endregion // CompareTo");
+
+            #endregion
+
+            #region ToString
+
+            sb.AppendLine();
+            sb.AppendLine($"{space}#region ToString");
+            sb.AppendLine();
+            sb.AppendLine($"{space}{AggressiveInlining}");
+            sb.Append(
+                $"{space}public override string ToString() => $\"{{nameof({TypeName})}}.{{nameof({tags_name}.{@case.Name})}} {{{{ ");
+            {
+                var _first = true;
+                foreach (var item in @case.Items)
+                {
+                    if (_first) _first = false;
+                    else sb.Append(", ");
+                    sb.Append($"{item.Name} = {{{item.Name}}}");
+                }
+            }
+            sb.AppendLine(" }}\";");
+
+            sb.AppendLine();
+            sb.AppendLine($"{space}#endregion // ToString");
+
+            #endregion
+
+            #region Deconstruct
+
+            {
+                sb.AppendLine();
+                sb.AppendLine($"{space}#region Deconstruct");
+                sb.AppendLine();
+                sb.AppendLine($"{space}{AggressiveInlining}");
+                sb.Append($"{space}public void Deconstruct(");
+                var _first = true;
+                foreach (var item in @case.Items)
+                {
+                    if (_first) _first = false;
+                    else sb.Append(", ");
+                    sb.Append($"out {item.Type} {item.Name}");
+                }
+                sb.AppendLine($")");
+                sb.AppendLine($"{space}{{");
+                foreach (var item in @case.Items)
+                {
+                    sb.AppendLine($"{space}    {item.Name} = this.{item.Name};");
+                }
+                sb.AppendLine($"{space}}}");
+                sb.AppendLine();
+                sb.AppendLine($"{space}#endregion // Deconstruct");
+            }
+
+            #endregion
+
+            sb.AppendLine($"    }}");
+        }
+
+        if (!first)
+        {
+            sb.AppendLine();
+            sb.AppendLine($"    #endregion // Views");
+        }
     }
 
     private void GenImpl(string name, string tags_name)
     {
+        sb.AppendLine();
+        sb.AppendLine($"    #region Impl");
+        sb.AppendLine();
         sb.AppendLine($"    {CompilerGenerated}");
         sb.AppendLine($"    {LayoutAuto}");
         sb.AppendLine($"    internal struct {name}");
@@ -792,19 +1026,29 @@ public class TemplateStructUnion(
         #endregion
 
         sb.AppendLine($"    }}");
+        sb.AppendLine();
+        sb.AppendLine($"    #endregion // Impl");
     }
 
     private void GenMakeEmpty()
     {
+        sb.AppendLine();
+        sb.AppendLine($"    #region Make");
+        sb.AppendLine();
         sb.AppendLine($"    {AggressiveInlining}");
         sb.AppendLine($"    public static {TypeName} Make() => new(default(__impl_)!);");
+        sb.AppendLine();
+        sb.AppendLine($"    #endregion // Make");
     }
 
     private void GenMake(string impl_name, string tags_name)
     {
+        sb.AppendLine();
+        sb.AppendLine($"    #region Make");
         var space = "        ";
         foreach (var (@case, i) in Cases.Select(static (a, b) => (a, b)))
         {
+            sb.AppendLine();
             sb.AppendLine($"    {AggressiveInlining}");
             sb.Append($"    public static {TypeName} Make{@case.Name}(");
             if (@case.IsRecord)
@@ -869,37 +1113,52 @@ public class TemplateStructUnion(
             sb.AppendLine($"{space}return new {TypeName}(_impl);");
             sb.AppendLine($"    }}");
         }
+        sb.AppendLine();
+        sb.AppendLine($"    #endregion // Make");
     }
 
     private void GenIs(string tags_name)
     {
+        sb.AppendLine();
+        sb.AppendLine($"    #region Is");
         foreach (var @case in Cases)
         {
+            sb.AppendLine();
             sb.AppendLine($"    public{@readonly} bool Is{@case.Name}");
             sb.AppendLine($"    {{");
             sb.AppendLine($"        {AggressiveInlining}");
             sb.AppendLine($"        get => this._impl._tag == {tags_name}.{@case.Name};");
             sb.AppendLine($"    }}");
         }
+        sb.AppendLine();
+        sb.AppendLine($"    #endregion // Is");
     }
 
     private void GenGetter(string impl_type)
     {
+        sb.AppendLine();
+        sb.AppendLine($"    #region Getter");
         foreach (var @case in Cases)
         {
             if (@case is { IsRecord: false, Type: "void" }) continue;
+            sb.AppendLine();
             if (!IsClass) sb.AppendLine("    [global::System.Diagnostics.CodeAnalysis.UnscopedRef]");
             var ro = ReadOnly ? " readonly" : "";
             var ret_type = @case.IsRecord ? string.Format(@case.Meta.ViewName, @case.Name) : @case.Type;
-            sb.AppendLine($"    public ref{ro} {ret_type} {@case.Name}");
+            var ret_ref = @case.IsRecord && SupportByRefFields ? "" : $" ref{ro}";
+            sb.AppendLine($"    public{ret_ref} {ret_type} {@case.Name}");
             sb.AppendLine($"    {{");
 
             void GenField()
             {
                 if (@case.IsRecord)
                 {
-                    sb.Append(
-                        $"global::System.Runtime.CompilerServices.Unsafe.As<{impl_type}, {ret_type}>(ref {RoImpl})");
+                    if (SupportByRefFields)
+                        sb.Append(
+                            $"new {ret_type}(ref {RoImpl})");
+                    else
+                        sb.Append(
+                            $"global::System.Runtime.CompilerServices.Unsafe.As<{impl_type}, {ret_type}>(ref {RoImpl})");
                 }
                 else if (@case.Kind == UnionCaseTypeKind.None)
                 {
@@ -921,8 +1180,12 @@ public class TemplateStructUnion(
             #region Getter
 
             sb.AppendLine($"        {AggressiveInlining}");
-            sb.Append(
-                $"        get => ref !this.Is{@case.Name} ? ref global::System.Runtime.CompilerServices.Unsafe.NullRef<{ret_type}>() : ref ");
+            if (@case.IsRecord && SupportByRefFields)
+                sb.Append(
+                    $"        get => !this.Is{@case.Name} ? throw new global::System.NullReferenceException() : ");
+            else
+                sb.Append(
+                    $"        get => ref !this.Is{@case.Name} ? ref global::System.Runtime.CompilerServices.Unsafe.NullRef<{ret_type}>() : ref ");
             GenField();
             sb.AppendLine($";");
 
@@ -930,11 +1193,16 @@ public class TemplateStructUnion(
 
             sb.AppendLine($"    }}");
         }
+        sb.AppendLine();
+        sb.AppendLine($"    #endregion // Getter");
     }
 
     private void GenEquatable(string tags_name)
     {
         if (!GenMethods.GenEquals) return;
+
+        sb.AppendLine($"    #region Equals");
+        sb.AppendLine();
 
         var q = IsClass && TypeName.Last() != '?' ? "?" : string.Empty;
 
@@ -974,7 +1242,9 @@ public class TemplateStructUnion(
         {
             if (@case is { IsRecord: false, Type: "void" }) continue;
             sb.AppendLine(
-                $"        {tags_name}.{@case.Name} => global::System.HashCode.Combine(this.Tag, {Self}.{@case.Name}),");
+                @case.IsRecord
+                    ? $"        {tags_name}.{@case.Name} => global::System.HashCode.Combine(this.Tag, {Self}.{@case.Name}.GetHashCode()),"
+                    : $"        {tags_name}.{@case.Name} => global::System.HashCode.Combine(this.Tag, {Self}.{@case.Name}),");
         }
         sb.AppendLine($"        _ => global::System.HashCode.Combine(this.Tag),");
         sb.AppendLine($"    }};");
@@ -993,17 +1263,23 @@ public class TemplateStructUnion(
 
         sb.AppendLine($"    {AggressiveInlining}");
         sb.AppendLine(
-            $"    public static bool operator ==({TypeName}{q} left, {TypeName}{q} right) => Equals(left, right);");
+            $"    public static bool operator ==({TypeName}{q} left, {TypeName}{q} right) => left.Equals(right);");
         sb.AppendLine($"    {AggressiveInlining}");
         sb.AppendLine(
-            $"    public static bool operator !=({TypeName}{q} left, {TypeName}{q} right) => !Equals(left, right);");
+            $"    public static bool operator !=({TypeName}{q} left, {TypeName}{q} right) => !left.Equals(right);");
 
         #endregion
+
+        sb.AppendLine();
+        sb.AppendLine($"    #endregion // Equals");
     }
 
     private void GenComparable(string tags_name)
     {
         if (!GenMethods.GenCompareTo) return;
+
+        sb.AppendLine($"    #region CompareTo");
+        sb.AppendLine();
 
         var q = IsClass && TypeName.Last() != '?' ? "?" : string.Empty;
 
@@ -1050,11 +1326,18 @@ public class TemplateStructUnion(
             $"    public static bool operator >=({TypeName} left, {TypeName} right) => left.CompareTo(right) >= 0;");
 
         #endregion
+
+        sb.AppendLine();
+        sb.AppendLine($"    #endregion // CompareTo");
     }
 
     private void GenToStr(string tags_name)
     {
         if (!GenMethods.GenToString) return;
+
+        sb.AppendLine($"    #region ToString");
+        sb.AppendLine();
+
         sb.AppendLine($"    {AggressiveInlining}");
         sb.AppendLine($"    public{@readonly} override string ToString() => this.Tag switch");
         sb.AppendLine($"    {{");
@@ -1063,7 +1346,7 @@ public class TemplateStructUnion(
             if (@case.IsRecord)
             {
                 sb.Append(
-                    $"        {tags_name}.{@case.Name} => $\"{{({Self}.{@case.Name})}}");
+                    $"        {tags_name}.{@case.Name} => $\"{{({Self}.{@case.Name}.ToString())}}");
             }
             else
             {
@@ -1076,5 +1359,8 @@ public class TemplateStructUnion(
         }
         sb.AppendLine($"        _ => nameof({TypeName}),");
         sb.AppendLine($"    }};");
+
+        sb.AppendLine();
+        sb.AppendLine($"    #endregion // ToString");
     }
 }

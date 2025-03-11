@@ -41,6 +41,7 @@ public class UnionGenerator : IIncrementalGenerator
                 var semantic_model = ctx.SemanticModel;
                 var symbol = (INamedTypeSymbol)ctx.TargetSymbol;
                 var GenBase = Utils.BuildGenBase(syntax, symbol, compilation);
+                var SupportByRefFields = compilation.SupportsRuntimeCapability(RuntimeCapability.ByRefFields);
                 var IsReadOnly = symbol.IsReadOnly;
                 var IsClass = syntax is ClassDeclarationSyntax;
                 var HasToString = symbol.GetMembers("ToString")
@@ -247,23 +248,12 @@ public class UnionGenerator : IIncrementalGenerator
                                     }
                                     items.Add(new RecordItem(type_name, arg_name, kind, is_generic));
                                 }
-                                var meta = new RecordMeta(
-                                    union_attr.RecordName, union_attr.ViewName, union_attr.ViewOnly
-                                );
+                                var meta = new RecordMeta(union_attr.ViewName);
                                 if (variant_attr != null)
                                 {
-                                    if (variant_attr.TryGetValue("RecordName", out var RecordNameConst))
-                                    {
-                                        meta.Name = RecordNameConst.Value?.ToString()!;
-                                    }
                                     if (variant_attr.TryGetValue("ViewName", out var ViewNameConst))
                                     {
                                         meta.ViewName = ViewNameConst.Value?.ToString()!;
-                                    }
-                                    if (variant_attr.TryGetValue("ViewOnly", out var ViewOnlyConst))
-                                    {
-                                        if (ViewOnlyConst.Value is bool v)
-                                            meta.ViewOnly = v;
                                     }
                                 }
                                 cases.Add(new UnionCase(
@@ -290,7 +280,7 @@ public class UnionGenerator : IIncrementalGenerator
                 var Name = syntax.Identifier.ToString();
                 return (
                     Name, symbol.DeclaredAccessibility, UnionAttr: union_attr, IsReadOnly, isClass: IsClass,
-                    cases.ToImmutableArray(), AnyGeneric, GenMethods, GenBase,
+                    cases.ToImmutableArray(), AnyGeneric, GenMethods, GenBase, SupportByRefFields,
                     AlwaysEq.Create(diagnostics)
                 );
             }
@@ -299,7 +289,7 @@ public class UnionGenerator : IIncrementalGenerator
         context.RegisterSourceOutput(sources, static (ctx, input) =>
         {
             var (Name, Accessibility, UnionAttr, IsReadOnly, IsClass, Cases, AnyGeneric, GenMethods, GenBase,
-                Diagnostics) = input;
+                SupportByRefFields, Diagnostics) = input;
             if (Diagnostics.Value.Count > 0)
             {
                 foreach (var diagnostic in Diagnostics.Value)
@@ -308,7 +298,8 @@ public class UnionGenerator : IIncrementalGenerator
                 }
             }
             var code = new TemplateStructUnion(
-                GenBase, Name, Accessibility, UnionAttr, IsReadOnly, IsClass, Cases, AnyGeneric, GenMethods
+                GenBase, Name, Accessibility, UnionAttr, IsReadOnly, IsClass, Cases, AnyGeneric, GenMethods,
+                SupportByRefFields
             ).Gen();
             var source_text = SourceText.From(code, Encoding.UTF8);
             var raw_source_file_name = GenBase.FileFullName;
