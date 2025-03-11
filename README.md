@@ -757,22 +757,18 @@ public partial class Tree
         void Node(int Value, Tree Left, Tree Right);
     }
 
-    public static int Sum(Tree Tree)
+    public static int Sum(Tree Tree) => Tree switch
     {
-        switch (Tree.Tag)
-        {
-            case Tags.Node:
-                ref var node = ref Tree.Node;
-                return node.Value + Sum(node.Left) + Sum(node.Right);
-            default:
-                return 0;
-        }
-    }
+        // Node: is a ref struct, which will avoid copying when matching patterns
+        { IsNode: true, Node: var (value, left, right) } => value + Sum(left) + Sum(right),
+        _ => 0,
+    };
 
     public static int Sum2(Tree Tree) => Tree switch
     {
-        // no by ref pattern match
-        { IsNode: true, Node: var (value, left, right) } => value + Sum(left) + Sum(right),
+        // Node: is a ref struct, which will avoid copying when matching patterns
+        { IsNode: true, Node: var node } =>
+            node.Value + Sum(node.Left) + Sum(node.Right),
         _ => 0,
     };
 }

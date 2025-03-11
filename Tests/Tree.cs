@@ -16,14 +16,16 @@ public partial class Tree
 
     public static int Sum(Tree Tree) => Tree switch
     {
+        // Node: is a ref struct, which will avoid copying when matching patterns
         { IsNode: true, Node: var (value, left, right) } => value + Sum(left) + Sum(right),
         _ => 0,
     };
 
     public static int Sum2(Tree Tree) => Tree switch
     {
-        { IsNode: true, Node.Value: var value, Node.Left: var left, Node.Right: var right } =>
-            value + Sum(left) + Sum(right),
+        // Node: is a ref struct, which will avoid copying when matching patterns
+        { IsNode: true, Node: var node } =>
+            node.Value + Sum(node.Left) + Sum(node.Right),
         _ => 0,
     };
 }
