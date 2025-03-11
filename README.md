@@ -7,7 +7,8 @@
   [![Nuget](https://img.shields.io/nuget/v/Coplt.Union)](https://www.nuget.org/packages/Coplt.Union/)
   [![openupm](https://img.shields.io/npm/v/net.sera.union?label=openupm&registry_uri=https://package.openupm.com)](https://openupm.com/packages/net.sera.union/)
 - Sera.Union.Utilities  
-  [![Nuget](https://img.shields.io/nuget/v/Coplt.Union.Utilities)](https://www.nuget.org/packages/Coplt.Union.Utilities/)
+  [![Nuget](https://img.shields.io/nuget/v/Coplt.Union.Utilities)](https://www.nuget.org/packages/Coplt.Union.Utilities/)  
+  Includes `Option<T>` and `Result<T, E>`
 
 Generate Tagged Union using source generator
 
@@ -17,7 +18,7 @@ Generate Tagged Union using source generator
 - Other types are sequential
 - Support generics, but generics cannot overlap
 
-## Example
+## Usage
 
 ```cs
 [Union]
@@ -54,7 +55,7 @@ public readonly partial struct Union1
     private struct __impl_
     {
         public object? _c0;                 // All classes will overlap
-        public object? _c1;
+        public object? _c1;                 // The second reference type is used by variant H, record mode allows multiple types
         public __unmanaged_ _u;             // All unmanaged types will overlap
         public (int a, string b) _f0_0;     // Mixed types cannot overlap
         public readonly Tags _tag;
@@ -559,3 +560,80 @@ switch (u.Tag)
   ...
 }
 ```
+
+## Examples
+
+### Shape
+
+[F# Shape](https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/discriminated-unions#remarks)
+
+```cs
+[Union]
+public partial struct Shape
+{
+    [UnionTemplate]
+    private interface Template
+    {
+        void Rectangle(float Width, float Length);
+        void Circle(float Radius);
+        void Prism(float Width1, float Width2, float Height);
+    }
+}
+
+public static void Foo()
+{
+    var rect = Shape.MakeRectangle(Length: 1.3f, Width: 1.3f);
+    var circ = Shape.MakeCircle(1.0f);
+    var prism = Shape.MakePrism(5f, 2f, Height: 3f);
+}
+public static void Foo(Shape shape)
+{
+    switch (shape)
+    {
+        case { IsRectangle: true, Rectangle.Width: var width }:
+            break;
+        case { IsCircle: true, Circle.Radius: var radius }:
+            break;
+        case { IsPrism: true, Prism.Width1: var width }:
+            break;
+    }
+}
+```
+
+### Tree
+
+[F# Tree](https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/discriminated-unions#using-discriminated-unions-for-tree-data-structures)
+
+```cs
+[Union]
+public partial class Tree
+{
+    [UnionTemplate]
+    private interface Template
+    {
+        void Tip();
+        void Node(int Value, Tree Left, Tree Right);
+    }
+
+    public static int Sum(Tree Tree)
+    {
+        switch (Tree.Tag)
+        {
+            case Tags.Node:
+                ref var node = ref Tree.Node;
+                return node.Value + Sum(node.Left) + Sum(node.Right);
+            default:
+                return 0;
+        }
+    }
+
+    public static int Sum2(Tree Tree) => Tree switch
+    {
+        // no by ref pattern match
+        { IsNode: true, Node: var (value, left, right) } => value + Sum(left) + Sum(right),
+        _ => 0,
+    };
+}
+```
+
+
