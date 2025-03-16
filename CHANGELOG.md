@@ -1,4 +1,8 @@
-﻿## 0.15.0
+﻿## 0.16.0
+- Add
+  - Default parameter support for record mode
+
+## 0.15.0
 - Breaking Changes
   - Record mode no longer generates record structures, only view structures
   - View structs now generate ref structs on runtimes that support ref structs

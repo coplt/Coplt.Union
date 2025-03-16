@@ -42,4 +42,7 @@
     <data name="Generator.Union.Error.ByRef" xml:space="preserve">
         <value>Union does not support ByRef</value>
     </data>
+    <data name="Generator.Union.Error.RecordOverloaded" xml:space="preserve">
+        <value>Variants do not allow overloading</value>
+    </data>
 </root>

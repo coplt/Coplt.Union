@@ -43,4 +43,7 @@
     <data name="Generator.Union.Error.ByRef" xml:space="preserve">
         <value>联合不支持 ByRef</value>
     </data>
+    <data name="Generator.Union.Error.RecordOverloaded" xml:space="preserve">
+        <value>变体不允许重载</value>
+    </data>
 </root>

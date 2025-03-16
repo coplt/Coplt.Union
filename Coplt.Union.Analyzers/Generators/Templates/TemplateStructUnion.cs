@@ -29,7 +29,8 @@ public record struct RecordItem(
     string Type,
     string Name,
     UnionCaseTypeKind Kind,
-    bool IsGeneric
+    bool IsGeneric,
+    string? DefaultValue
 );
 
 public record struct UnionCase(
@@ -1059,6 +1060,10 @@ public class TemplateStructUnion(
                     if (first) first = false;
                     else sb.Append(", ");
                     sb.Append($"{item.Type} {item.Name}");
+                    if (item.DefaultValue != null)
+                    {
+                        sb.Append($" = {item.DefaultValue}");
+                    }
                 }
             }
             else if (@case.Type != "void")

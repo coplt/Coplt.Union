@@ -77,6 +77,7 @@ public class UnionGenerator : IIncrementalGenerator
                 }
                 var cases = ImmutableArray.CreateBuilder<UnionCase>();
                 var AnyGeneric = false;
+                var variant_names = new HashSet<string>();
                 foreach (var (template, _) in Templates)
                 {
                     foreach (var (member, i) in template.Members.Select((a, b) => (a, b)))
@@ -84,6 +85,20 @@ public class UnionGenerator : IIncrementalGenerator
                         if (member is MethodDeclarationSyntax mds)
                         {
                             var case_name = mds.Identifier.ToString();
+                            if (!variant_names.Add(case_name))
+                            {
+                                var desc = Utils.MakeError(Id,
+                                    Strings.Get("Generator.Union.Error.RecordOverloaded"));
+                                if (member is BaseTypeDeclarationSyntax bts)
+                                {
+                                    diagnostics.Add(Diagnostic.Create(desc, bts.Identifier.GetLocation()));
+                                }
+                                else
+                                {
+                                    diagnostics.Add(Diagnostic.Create(desc, member.GetLocation()));
+                                }
+                                continue;
+                            }
                             var member_symbol = (IMethodSymbol)semantic_model.GetDeclaredSymbol(mds)!;
                             var ret_type_symbol = member_symbol.ReturnType;
                             var is_void = ret_type_symbol.SpecialType == SpecialType.System_Void;
@@ -246,7 +261,23 @@ public class UnionGenerator : IIncrementalGenerator
                                             }
                                         }
                                     }
-                                    items.Add(new RecordItem(type_name, arg_name, kind, is_generic));
+                                    var is_enum = type_symbol is { TypeKind: TypeKind.Enum };
+                                    var defv = parameter.HasExplicitDefaultValue
+                                        ? is_enum
+                                            ? $"({type_name}){parameter.ExplicitDefaultValue}"
+                                            : parameter.ExplicitDefaultValue switch
+                                            {
+                                                null => "default",
+                                                bool v => v ? "true" : "false",
+                                                string v => $"\"{v.Replace("\"", "\\\"")}\"",
+                                                (byte or sbyte or short or ushort or int or uint or long or ulong or double) and var v
+                                                    => $"{v}",
+                                                float v => $"{v}f",
+                                                decimal v => $"{v}m",
+                                                var v => $"({type_name}){v}",
+                                            }
+                                        : null;
+                                    items.Add(new RecordItem(type_name, arg_name, kind, is_generic, defv));
                                 }
                                 var meta = new RecordMeta(union_attr.ViewName);
                                 if (variant_attr != null)

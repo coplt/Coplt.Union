@@ -1,4 +1,5 @@
-﻿using Coplt.Union;
+﻿using System.Runtime.InteropServices;
+using Coplt.Union;
 
 namespace Tests;
 
@@ -117,5 +118,20 @@ public partial class Union11
     private interface Template
     {
         void Foo((float, string) a, (float, string) b, (int, string) c);
+    }
+}
+
+public struct Union12Foo { }
+
+[Union]
+public partial class Union12
+{
+    [UnionTemplate]
+    private interface Template
+    {
+        void Foo(int a = 1, bool b = true, string c = "foo", int? d = null, object? e = null);
+        void Foo2(byte a = 1, uint b = 1, Union12Foo c = default, nuint d = 1);
+        void Foo3(float a = 1.0f, double b = 1.0, decimal c = 1.0m, ulong d = 1);
+        void Foo4(LayoutKind a = LayoutKind.Auto, LayoutKind b = LayoutKind.Sequential);
     }
 }
