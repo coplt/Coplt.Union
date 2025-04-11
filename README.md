@@ -3,9 +3,9 @@
 [![.NET](https://github.com/coplt/Coplt.Union/actions/workflows/dotnet.yml/badge.svg)](https://github.com/coplt/Coplt.Union/actions/workflows/dotnet.yml)
 ![MIT](https://img.shields.io/github/license/coplt/Coplt.Union)
 
-- Sera.Union  
+- Coplt.Union  
   [![Nuget](https://img.shields.io/nuget/v/Coplt.Union)](https://www.nuget.org/packages/Coplt.Union/)
-- Sera.Union.Utilities  
+- Coplt.Union.Utilities  
   [![Nuget](https://img.shields.io/nuget/v/Coplt.Union.Utilities)](https://www.nuget.org/packages/Coplt.Union.Utilities/)  
   Includes `Option<T>` and `Result<T, E>`
 
