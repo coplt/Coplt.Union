@@ -83,7 +83,7 @@ namespace Coplt.Union
     /// Manually specify symbol semantics
     /// </summary>
     [AttributeUsage(
-        AttributeTargets.Method | AttributeTargets.Struct | AttributeTargets.Class | AttributeTargets.Parameter,
+        AttributeTargets.Method | AttributeTargets.Struct | AttributeTargets.Class | AttributeTargets.Parameter | AttributeTargets.Enum,
         Inherited = false
     )]
     internal sealed class UnionSymbolAttribute : Attribute

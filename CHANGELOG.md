@@ -1,4 +1,8 @@
-﻿## 0.16.0
+﻿## 0.17.0
+- Add
+  - UnionSymbolAttribute now allow Enum
+
+## 0.16.0
 - Add
   - Default parameter support for record mode
 
