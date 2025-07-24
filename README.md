@@ -646,7 +646,7 @@ switch (u.Tag)
   ...
 }
 
-switch (u.Tag)
+switch (u)
 {
     case { IsA: true, A: var a }:
         break;
