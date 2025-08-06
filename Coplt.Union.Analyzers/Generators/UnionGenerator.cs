@@ -204,6 +204,7 @@ public class UnionGenerator : IIncrementalGenerator
                                     var type_name = type_symbol.ToDisplayString(TypeDisplayFormat);
                                     var arg_name = parameter.Name;
                                     var is_generic = type_symbol.IsNotInstGenericType();
+                                    if (is_generic) AnyGeneric = true;
                                     var kind = UnionCaseTypeKind.None;
                                     if (type_symbol.IsUnmanagedType) kind = UnionCaseTypeKind.Unmanaged;
                                     else if (type_symbol.IsReferenceType) kind = UnionCaseTypeKind.Class;
