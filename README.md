@@ -16,7 +16,7 @@ Generate Tagged Union using source generator
 - All classes will overlap
 - Other types are sequential
 - Support generics, but generics cannot overlap
-- Union2 use .Net10 extension syntax
+- Union2 use .Net10 extension syntax, [View Union1](https://github.com/coplt/Coplt.Union/tree/f9df8c03234c0a6d24a3a38b2f03bd95908f1374)
 
 ## Usage
 
