@@ -1490,7 +1490,7 @@ public class TemplateStructUnion(
                     var item = @case.Items[index];
                     sb.AppendLine($"            _impl._f{ti}_{nth} = {item.Name};");
                 }
-                sb.AppendLine($"            return new {TypeFullName}(new {impl_name}({tags_name}.{@case.Name}));");
+                sb.AppendLine($"            return new {TypeFullName}(_impl);");
                 sb.AppendLine($"        }}");
             }
             else if (@case.Type != "void")
@@ -1515,7 +1515,7 @@ public class TemplateStructUnion(
                     var index = UnmanagedTypes[@case.Type];
                     sb.AppendLine($"            _impl._u._{index} = value;");
                 }
-                sb.AppendLine($"            return new {TypeFullName}(new {impl_name}({tags_name}.{@case.Name}));");
+                sb.AppendLine($"            return new {TypeFullName}(_impl);");
                 sb.AppendLine($"        }}");
             }
             else
