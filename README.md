@@ -141,7 +141,9 @@ Complete generate output:
 #nullable disable warnings
 #nullable enable annotations
 
+using System.Runtime.InteropServices;
 using Coplt.Union;
+
 
 public readonly partial struct Union1
     : global::Coplt.Union.ITaggedUnion
@@ -160,7 +162,7 @@ public readonly partial struct Union1
 
     #region Ctor
 
-    private Union1(__impl_ _impl) { this._impl = _impl; }
+    internal Union1(__impl_ _impl) { this._impl = _impl; }
 
     #endregion // Ctor
 
@@ -367,77 +369,6 @@ public readonly partial struct Union1
 
     #endregion // Views
 
-    #region Make
-
-    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    public static Union1 MakeA(int value)
-    {
-        var _impl = new __impl_(Tags.A);
-        _impl._u._0 = value;
-        return new Union1(_impl);
-    }
-
-    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    public static Union1 MakeB(string value)
-    {
-        var _impl = new __impl_(Tags.B);
-        _impl._c0 = value;
-        return new Union1(_impl);
-    }
-
-    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    public static Union1 MakeC(bool value)
-    {
-        var _impl = new __impl_(Tags.C);
-        _impl._u._1 = value;
-        return new Union1(_impl);
-    }
-
-    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    public static Union1 MakeD((int a, int b) value)
-    {
-        var _impl = new __impl_(Tags.D);
-        _impl._u._2 = value;
-        return new Union1(_impl);
-    }
-
-    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    public static Union1 MakeE()
-    {
-        var _impl = new __impl_(Tags.E);
-        return new Union1(_impl);
-    }
-
-    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    public static Union1 MakeF(global::System.Collections.Generic.List<int>? value)
-    {
-        var _impl = new __impl_(Tags.F);
-        _impl._c0 = value;
-        return new Union1(_impl);
-    }
-
-    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    public static Union1 MakeG((int a, string b) value)
-    {
-        var _impl = new __impl_(Tags.G);
-        _impl._f0_0 = value;
-        return new Union1(_impl);
-    }
-
-    [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
-    public static Union1 MakeH(int a, int b, string c, global::System.Collections.Generic.HashSet<int> d, (int a, string b) e)
-    {
-        var _impl = new __impl_(Tags.H);
-        _impl._u._3._0 = a;
-        _impl._u._3._1 = b;
-        _impl._c0 = c;
-        _impl._c1 = d;
-        _impl._f0_0 = e;
-        return new Union1(_impl);
-    }
-
-    #endregion // Make
-
     #region Is
 
     public readonly bool IsA
@@ -624,6 +555,85 @@ public readonly partial struct Union1
     };
 
     #endregion // ToString
+}
+
+
+public static partial class Union1Extensions
+{
+    extension(global::Union1)
+    {
+
+        #region Make
+
+        [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static global::Union1 A(int value)
+        {
+            var _impl = new global::Union1.__impl_(global::Union1.Tags.A);
+            _impl._u._0 = value;
+            return new global::Union1(_impl);
+        }
+
+        [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static global::Union1 B(string value)
+        {
+            var _impl = new global::Union1.__impl_(global::Union1.Tags.B);
+            _impl._c0 = value;
+            return new global::Union1(_impl);
+        }
+
+        [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static global::Union1 C(bool value)
+        {
+            var _impl = new global::Union1.__impl_(global::Union1.Tags.C);
+            _impl._u._1 = value;
+            return new global::Union1(_impl);
+        }
+
+        [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static global::Union1 D((int a, int b) value)
+        {
+            var _impl = new global::Union1.__impl_(global::Union1.Tags.D);
+            _impl._u._2 = value;
+            return new global::Union1(_impl);
+        }
+
+        public static global::Union1 E
+        {
+            [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+            get => new global::Union1(new global::Union1.__impl_(global::Union1.Tags.E));
+        }
+
+        [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static global::Union1 F(global::System.Collections.Generic.List<int>? value)
+        {
+            var _impl = new global::Union1.__impl_(global::Union1.Tags.F);
+            _impl._c0 = value;
+            return new global::Union1(_impl);
+        }
+
+        [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static global::Union1 G((int a, string b) value)
+        {
+            var _impl = new global::Union1.__impl_(global::Union1.Tags.G);
+            _impl._f0_0 = value;
+            return new global::Union1(_impl);
+        }
+
+        [global::System.Runtime.CompilerServices.MethodImpl(global::System.Runtime.CompilerServices.MethodImplOptions.AggressiveInlining)]
+        public static global::Union1 H(int a, int b, string c, global::System.Collections.Generic.HashSet<int> d, (int a, string b) e)
+        {
+            var _impl = new global::Union1.__impl_(global::Union1.Tags.H);
+            _impl._u._3._0 = a;
+            _impl._u._3._1 = b;
+            _impl._c0 = c;
+            _impl._c1 = d;
+            _impl._f0_0 = e;
+            return new global::Union1(_impl);
+        }
+
+        #endregion // Make
+
+    }
 }
 ```
 
