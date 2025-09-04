@@ -4,7 +4,7 @@ using Coplt.Union.Misc;
 
 namespace Tests;
 
-[Union, UnionSymbol(IsReferenceType = MayBool.True)]
+[Union2, UnionSymbol(IsReferenceType = MayBool.True)]
 public partial class Tree
 {
     [UnionTemplate]

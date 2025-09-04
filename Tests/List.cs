@@ -3,7 +3,7 @@ using Coplt.Union.Misc;
 
 namespace Tests;
 
-[Union, UnionSymbol(IsReferenceType = MayBool.True)]
+[Union2, UnionSymbol(IsReferenceType = MayBool.True)]
 public partial class list<T>
 {
     [UnionTemplate]
@@ -11,5 +11,13 @@ public partial class list<T>
     {
         void Nil();
         void Cons(T Item, list<T> Tail);
+    }
+}
+
+public static class TestList
+{
+    public static void Foo()
+    {
+        var a = list<int>.Cons(1, list<int>.Nil);
     }
 }

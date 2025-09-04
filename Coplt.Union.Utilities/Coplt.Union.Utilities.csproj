@@ -1,12 +1,11 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
-        <TargetFrameworks>netstandard2.0;netstandard2.1;net6.0;net7.0;net8.0;net9.0</TargetFrameworks>
-        <LangVersion>13.0</LangVersion>
         <Nullable>enable</Nullable>
         <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
         <RootNamespace>Coplt.Union.Utilities</RootNamespace>
-        <Version>0.15.0</Version>
+        <Version>0.19.0</Version>
+        <LangVersion>preview</LangVersion>
         <Description>Tagged union for c#</Description>
         <PackageProjectUrl>https://github.com/coplt/Coplt.Union</PackageProjectUrl>
         <RepositoryUrl>https://github.com/coplt/Coplt.Union</RepositoryUrl>

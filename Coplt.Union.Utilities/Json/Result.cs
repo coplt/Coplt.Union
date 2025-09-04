@@ -39,12 +39,12 @@ public class ResultConverter<T, E>(JsonSerializerOptions options) : JsonConverte
             case "ok":
                 reader.Read();
                 var v = ValueConverter.Read(ref reader, typeof(T), options);
-                r = Result<T, E>.MakeOk(v!);
+                r = Result<T, E>.Ok(v!);
                 break;
             case "err":
                 reader.Read();
                 var e = ErrorConverter.Read(ref reader, typeof(E), options);
-                r = Result<T, E>.MakeErr(e!);
+                r = Result<T, E>.Err(e!);
                 break;
             default:
                 throw new JsonException();

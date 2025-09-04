@@ -7,7 +7,7 @@ namespace Coplt.Union
     /// Union
     /// </summary>
     [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class, Inherited = false)]
-    internal sealed class UnionAttribute : Attribute
+    internal class UnionAttribute : Attribute
     {
         /// <summary>
         /// Tags name
@@ -55,6 +55,18 @@ namespace Coplt.Union
         /// View name if variant is record mode for all variant
         /// </summary>
         public string ViewName { get; set; } = "Variant{0}";
+    }
+
+    /// <summary>
+    /// Union2
+    /// </summary>
+    [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Class, Inherited = false)]
+    internal sealed class Union2Attribute : UnionAttribute
+    {
+        /// <summary>
+        /// The name of the extension class, position 0 is the union name
+        /// </summary>
+        public string ExtensionName { get; set; } = "{0}Extensions";
     }
 
     /// <summary>

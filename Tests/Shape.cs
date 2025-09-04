@@ -3,7 +3,7 @@ using Coplt.Union;
 
 namespace Tests;
 
-[Union]
+[Union2]
 public partial struct Shape
 {
     [UnionTemplate]
@@ -19,9 +19,9 @@ public static class ShapeFoo
 {
     public static void Foo()
     {
-        var rect = Shape.MakeRectangle(Length: 1.3f, Width: 1.3f);
-        var circ = Shape.MakeCircle(1.0f);
-        var prism = Shape.MakePrism(5f, 2f, Height: 3f);
+        var rect = Shape.Rectangle(Length: 1.3f, Width: 1.3f);
+        var circ = Shape.Circle(1.0f);
+        var prism = Shape.Prism(5f, 2f, Height: 3f);
     }
     public static void Foo(Shape shape)
     {

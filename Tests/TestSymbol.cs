@@ -5,7 +5,7 @@ namespace Tests;
 
 public partial class TestSymbol
 {
-    [Union]
+    [Union2]
     public readonly partial struct Union1
     {
         [UnionTemplate]
@@ -16,7 +16,7 @@ public partial class TestSymbol
         }
     }
 
-    [Union]
+    [Union2]
     [UnionSymbol(IsUnmanagedType = MayBool.False)]
     public readonly partial struct Union2
     {
@@ -28,7 +28,7 @@ public partial class TestSymbol
         }
     }
     
-    [Union]
+    [Union2]
     public readonly partial struct Union3
     {
         [UnionTemplate]

@@ -6,7 +6,7 @@ using Coplt.Union.Utilities.Json;
 
 namespace Coplt.Union.Utilities;
 
-[Union]
+[Union2]
 [JsonConverter(typeof(ResultConverter))]
 public partial struct Result<T, E>
 {
@@ -18,30 +18,30 @@ public partial struct Result<T, E>
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator Result<T, E>(OkOf<T> r) => MakeOk(r.Value);
+    public static implicit operator Result<T, E>(OkOf<T> r) => Result<T, E>.Ok(r.Value);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator Result<T, E>(ErrOf<E> r) => MakeErr(r.Error);
+    public static implicit operator Result<T, E>(ErrOf<E> r) => Result<T, E>.Err(r.Error);
 }
 
 public readonly record struct OkOf<T>(T Value)
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Result<T, E> ToResult<E>() => Result<T, E>.MakeOk(Value);
+    public Result<T, E> ToResult<E>() => Result<T, E>.Ok(Value);
 }
 
 public readonly record struct ErrOf<E>(E Error)
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Result<T, E> ToResult<T>() => Result<T, E>.MakeErr(Error);
+    public Result<T, E> ToResult<T>() => Result<T, E>.Err(Error);
 }
 
 public static class Result<A>
 {
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Result<T, A> Ok<T>(T value) => Result<T, A>.MakeOk(value);
+    public static Result<T, A> Ok<T>(T value) => Result<T, A>.Ok(value);
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Result<A, E> Err<E>(E value) => Result<A, E>.MakeErr(value);
+    public static Result<A, E> Err<E>(E value) => Result<A, E>.Err(value);
 }
 
 public static class Result
@@ -53,9 +53,9 @@ public static class Result
     public static ErrOf<E> Err<E>(E value) => new(value);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Result<T, E> Ok<T, E>(T value) => Result<T, E>.MakeOk(value);
+    public static Result<T, E> Ok<T, E>(T value) => Result<T, E>.Ok(value);
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Result<T, E> Err<T, E>(E value) => Result<T, E>.MakeErr(value);
+    public static Result<T, E> Err<T, E>(E value) => Result<T, E>.Err(value);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static Result<R, E> Map<T, E, R>(this Result<T, E> result, Func<T, R> selector) =>

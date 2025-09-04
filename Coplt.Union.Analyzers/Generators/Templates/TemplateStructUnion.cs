@@ -54,14 +54,18 @@ public record struct UnionAttr(
     bool? GenerateToString,
     bool GenerateEquals,
     bool GenerateCompareTo,
-    string ViewName
+    string ViewName,
+    bool Union2,
+    string ExtensionName
 )
 {
     public static UnionAttr FromData(AttributeData data, List<Diagnostic> diagnostics)
     {
+        var is_union2 = data.AttributeClass?.Name == "Union2Attribute";
         var a = new UnionAttr(
             "Tags", false, "{0}Tags", null,
-            null, true, true, "Variant{0}"
+            null, true, true, "Variant{0}",
+            is_union2, "{0}Extensions"
         );
         foreach (var kv in data.NamedArguments)
         {
@@ -110,6 +114,9 @@ public record struct UnionAttr(
                 case "ViewName":
                     a.ViewName = (string)kv.Value.Value!;
                     break;
+                case "ExtensionName":
+                    a.ExtensionName = (string)kv.Value.Value!;
+                    break;
             }
         }
         return a;
@@ -128,7 +135,12 @@ public class TemplateStructUnion(
     ImmutableArray<UnionCase> Cases,
     bool AnyGeneric,
     UnionGenerateMethod GenMethods,
-    bool SupportByRefFields
+    bool SupportByRefFields,
+    ImmutableArray<string> Generics,
+    string Constraints,
+    string NameSpace,
+    string TypeFullName,
+    string TypeNestedName
 ) : ATemplate(GenBase)
 {
     public const string AggressiveInlining =
@@ -152,10 +164,11 @@ public class TemplateStructUnion(
     private string RoSelf = null!;
     private string RoImpl = null!;
 
+    private string impl_name = $"__impl_";
+    private string tags_name = Attr.ExternalTags ? string.Format(Attr.ExternalTagsName, Name) : Attr.TagsName;
+
     protected override void DoGen()
     {
-        var impl_name = $"__impl_";
-
         Self = IsClass || ReadOnly
             ? "this"
             : $"global::System.Runtime.CompilerServices.Unsafe.AsRef<{TypeName}>(in this)";
@@ -172,8 +185,6 @@ public class TemplateStructUnion(
             HashName = string.Join("", bytes.Select(b => $"{b:X2}"));
             HashName = $"{Name}_{HashName}";
         }
-
-        var tags_name = Attr.ExternalTags ? string.Format(Attr.ExternalTagsName, Name) : Attr.TagsName;
 
         if (Attr.ExternalTags)
         {
@@ -208,7 +219,7 @@ public class TemplateStructUnion(
         sb.AppendLine();
         sb.AppendLine($"    #region Ctor");
         sb.AppendLine();
-        sb.AppendLine($"    private {Name}({impl_name} _impl) {{ this._impl = _impl; }}");
+        sb.AppendLine($"    {(Attr.Union2 ? "internal" : "private")} {Name}({impl_name} _impl) {{ this._impl = _impl; }}");
         sb.AppendLine();
         sb.AppendLine($"    #endregion // Ctor");
 
@@ -236,7 +247,10 @@ public class TemplateStructUnion(
 
         if (Cases.Length > 0)
         {
-            GenMake(impl_name, tags_name);
+            if (!Attr.Union2)
+            {
+                GenMake(impl_name, tags_name);
+            }
 
             GenIs(tags_name);
 
@@ -244,7 +258,10 @@ public class TemplateStructUnion(
         }
         else
         {
-            GenMakeEmpty();
+            if (!Attr.Union2)
+            {
+                GenMakeEmpty();
+            }
         }
 
         sb.AppendLine();
@@ -262,6 +279,14 @@ public class TemplateStructUnion(
         {
             sb.AppendLine();
             sb.Append(ex);
+        }
+    }
+
+    protected override void DoGenFileScope()
+    {
+        if (Attr.Union2)
+        {
+            GenUnion2Ex(impl_name, tags_name);
         }
     }
 
@@ -1367,5 +1392,142 @@ public class TemplateStructUnion(
 
         sb.AppendLine();
         sb.AppendLine($"    #endregion // ToString");
+    }
+
+    private void GenUnion2Ex(string impl_name, string tags_name)
+    {
+        var has_ns = !string.IsNullOrWhiteSpace(NameSpace);
+        if (has_ns)
+        {
+            sb.AppendLine();
+            sb.AppendLine($"namespace {NameSpace}");
+            sb.AppendLine("{");
+        }
+
+        sb.AppendLine();
+        sb.Append("public static partial class ");
+        sb.AppendFormat(Attr.ExtensionName, TypeNestedName.Replace(".", "_"));
+        sb.AppendLine("\n{");
+        sb.Append($"    extension");
+        if (!Generics.IsEmpty)
+        {
+            sb.Append($"<");
+            var first = true;
+            foreach (var generic in Generics)
+            {
+                if (first) first = false;
+                else sb.Append(", ");
+                sb.Append(generic);
+            }
+            sb.Append($">");
+        }
+        sb.AppendLine($"({TypeFullName})");
+        if (!string.IsNullOrWhiteSpace(Constraints))
+        {
+            sb.AppendLine($"        {Constraints}");
+        }
+        sb.AppendLine("    {");
+        GenUnion2Make(impl_name, tags_name);
+        sb.AppendLine();
+        sb.AppendLine("    }");
+        sb.AppendLine("}");
+
+        if (has_ns)
+        {
+            sb.AppendLine();
+            sb.AppendLine($"}} // namespace {NameSpace}");
+        }
+    }
+
+    private void GenUnion2Make(string impl_name, string tags_name)
+    {
+        impl_name = $"{TypeFullName}.{impl_name}";
+        tags_name = Attr.ExternalTags ? tags_name : $"{TypeFullName}.{tags_name}";
+
+        sb.AppendLine();
+        sb.AppendLine($"        #region Make");
+        foreach (var (@case, i) in Cases.Select(static (a, b) => (a, b)))
+        {
+            sb.AppendLine();
+            if (@case.IsRecord)
+            {
+                sb.AppendLine($"        {AggressiveInlining}");
+                sb.Append($"        public static {TypeFullName} {@case.Name}(");
+                {
+                    var first = true;
+                    foreach (var item in @case.Items)
+                    {
+                        if (first) first = false;
+                        else sb.Append(", ");
+                        sb.Append($"{item.Type} {item.Name}");
+                        if (item.DefaultValue != null)
+                        {
+                            sb.Append($" = {item.DefaultValue}");
+                        }
+                    }
+                }
+                sb.AppendLine($")");
+                sb.AppendLine($"        {{");
+                sb.AppendLine($"            var _impl = new {impl_name}({tags_name}.{@case.Name});");
+                var def = RecordTypeDefines[i];
+                if (def.UnmanagedFields.Count > 0)
+                {
+                    var uti = UnmanagedTypes[def.UnmanagedTypeName];
+                    foreach (var (_, index) in def.UnmanagedFields)
+                    {
+                        var item = @case.Items[index];
+                        sb.AppendLine($"            _impl._u._{uti}._{index} = {item.Name};");
+                    }
+                }
+                foreach (var (_, index, nth) in def.ClassFields)
+                {
+                    var item = @case.Items[index];
+                    sb.AppendLine($"            _impl._c{nth} = {item.Name};");
+                }
+                foreach (var (type, index, nth) in def.OtherFields)
+                {
+                    var (ti, _) = OtherTypes[type];
+                    var item = @case.Items[index];
+                    sb.AppendLine($"            _impl._f{ti}_{nth} = {item.Name};");
+                }
+                sb.AppendLine($"            return new {TypeFullName}(new {impl_name}({tags_name}.{@case.Name}));");
+                sb.AppendLine($"        }}");
+            }
+            else if (@case.Type != "void")
+            {
+                sb.AppendLine($"        {AggressiveInlining}");
+                sb.Append($"        public static {TypeFullName} {@case.Name}(");
+                sb.Append(@case.Type);
+                sb.AppendLine($" value)");
+                sb.AppendLine($"        {{");
+                sb.AppendLine($"            var _impl = new {impl_name}({tags_name}.{@case.Name});");
+                if (@case.Kind == UnionCaseTypeKind.None)
+                {
+                    var (index, _) = OtherTypes![@case.Type];
+                    sb.AppendLine($"            _impl._f{index}_0 = value;");
+                }
+                else if (@case.Kind == UnionCaseTypeKind.Class)
+                {
+                    sb.AppendLine($"            _impl._c0 = value;");
+                }
+                else if (@case.Kind == UnionCaseTypeKind.Unmanaged)
+                {
+                    var index = UnmanagedTypes[@case.Type];
+                    sb.AppendLine($"            _impl._u._{index} = value;");
+                }
+                sb.AppendLine($"            return new {TypeFullName}(new {impl_name}({tags_name}.{@case.Name}));");
+                sb.AppendLine($"        }}");
+            }
+            else
+            {
+                sb.AppendLine($"        public static {TypeFullName} {@case.Name}");
+                sb.AppendLine($"        {{");
+                sb.AppendLine($"            {AggressiveInlining}");
+                sb.AppendLine($"            get => new {TypeFullName}(new {impl_name}({tags_name}.{@case.Name}));");
+                sb.AppendLine($"        }}");
+            }
+        }
+        sb.AppendLine();
+        sb.AppendLine($"        #endregion // Make");
     }
 }

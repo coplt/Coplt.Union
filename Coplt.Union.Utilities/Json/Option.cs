@@ -31,9 +31,9 @@ public class OptionConverter<T>(JsonSerializerOptions options) : JsonConverter<O
 
     public override Option<T> Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
     {
-        if (reader.TokenType == JsonTokenType.Null) return Option<T>.MakeNone();
+        if (reader.TokenType == JsonTokenType.Null) return Option<T>.None;
         var v = ValueConverter.Read(ref reader, typeof(T), options)!;
-        return Option<T>.MakeSome(v);
+        return Option<T>.Some(v);
     }
 
     public override void Write(Utf8JsonWriter writer, Option<T> value, JsonSerializerOptions options)

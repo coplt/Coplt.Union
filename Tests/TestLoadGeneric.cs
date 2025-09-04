@@ -2,7 +2,7 @@
 
 namespace Tests;
 
-[Union]
+[Union2]
 public partial struct Generic1<T>
 {
     [UnionTemplate]
@@ -19,7 +19,7 @@ public class TestLoadGeneric
     [Test]
     public void Test1()
     {
-        var a = Generic1<int>.MakeB(123);
+        var a = Generic1<int>.B(123);
         Console.WriteLine(a);
     }
     

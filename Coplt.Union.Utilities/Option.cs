@@ -7,7 +7,7 @@ using Coplt.Union.Utilities.Json;
 
 namespace Coplt.Union.Utilities;
 
-[Union(GenerateEquals = false)]
+[Union2(GenerateEquals = false)]
 [JsonConverter(typeof(OptionConverter))]
 public partial struct Option<T> : IEquatable<Unit>
 #if NET7_0_OR_GREATER
@@ -22,10 +22,10 @@ public partial struct Option<T> : IEquatable<Unit>
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Option() => this = MakeNone();
+    public Option() => this = None;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public Option(T value) => this = MakeSome(value);
+    public Option(T value) => this = Some(value);
 
     public int Count
     {
@@ -45,12 +45,6 @@ public partial struct Option<T> : IEquatable<Unit>
         get => Some;
     }
 
-    public static Option<T> None
-    {
-        [MethodImpl(MethodImplOptions.AggressiveInlining)]
-        get => MakeNone();
-    }
-
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static implicit operator Option<T>(T value) => new(value);
 
@@ -58,7 +52,7 @@ public partial struct Option<T> : IEquatable<Unit>
     public static explicit operator T(Option<T> value) => value.Value;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static implicit operator Option<T>(Unit none) => MakeNone();
+    public static implicit operator Option<T>(Unit none) => Option<T>.None;
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public readonly bool Equals(Unit other) => Tag == Tags.None;
@@ -111,7 +105,7 @@ public static class Option
     }
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
-    public static Option<T> Some<T>(T value) => Option<T>.MakeSome(value);
+    public static Option<T> Some<T>(T value) => Option<T>.Some(value);
 
     [MethodImpl(MethodImplOptions.AggressiveInlining)]
     public static T Unwrap<T>(this Option<T> option) => option.Some;

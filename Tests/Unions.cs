@@ -3,7 +3,7 @@ using Coplt.Union;
 
 namespace Tests;
 
-[Union]
+[Union2]
 public readonly partial struct Union1
 {
     [UnionTemplate]
@@ -20,7 +20,7 @@ public readonly partial struct Union1
     }
 }
 
-[Union]
+[Union2]
 public partial struct Union2
 {
     [UnionTemplate]
@@ -37,7 +37,7 @@ public partial struct Union2
     }
 }
 
-[Union]
+[Union2]
 public partial struct Option<T>
 {
     [UnionTemplate]
@@ -48,7 +48,7 @@ public partial struct Option<T>
     }
 }
 
-[Union]
+[Union2]
 public partial struct Result<T, E>
 {
     [UnionTemplate]
@@ -59,22 +59,22 @@ public partial struct Result<T, E>
     }
 }
 
-[Union]
+[Union2]
 public partial struct Empty { }
 
-[Union(TagsName = "Kind")]
+[Union2(TagsName = "Kind")]
 public partial struct Union3 { }
 
-[Union(ExternalTags = true)]
+[Union2(ExternalTags = true)]
 public partial struct Union4 { }
 
-[Union(ExternalTags = true, ExternalTagsName = "{0}Kind")]
+[Union2(ExternalTags = true, ExternalTagsName = "{0}Kind")]
 public partial struct Union5 { }
 
-[Union(TagsUnderlying = typeof(ulong))]
+[Union2(TagsUnderlying = typeof(ulong))]
 public partial struct Union6 { }
 
-[Union]
+[Union2]
 public partial struct Union7
 {
     [UnionTemplate]
@@ -85,10 +85,10 @@ public partial struct Union7
     }
 }
 
-[Union(ExternalTags = true, ExternalTagsName = "Union8Foo")]
+[Union2(ExternalTags = true, ExternalTagsName = "Union8Foo")]
 public partial struct Union8 { }
 
-[Union]
+[Union2]
 public partial class Union9
 {
     [UnionTemplate]
@@ -105,13 +105,13 @@ public partial class Union9
     }
 }
 
-[Union(GenerateEquals = false, GenerateCompareTo = false)]
+[Union2(GenerateEquals = false, GenerateCompareTo = false)]
 public partial class Union10
 {
     public override string ToString() => "Fuck";
 }
 
-[Union]
+[Union2]
 public partial class Union11
 {
     [UnionTemplate]
@@ -123,7 +123,7 @@ public partial class Union11
 
 public struct Union12Foo { }
 
-[Union]
+[Union2]
 public partial class Union12
 {
     [UnionTemplate]

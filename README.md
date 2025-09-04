@@ -16,11 +16,12 @@ Generate Tagged Union using source generator
 - All classes will overlap
 - Other types are sequential
 - Support generics, but generics cannot overlap
+- Union2 use .Net10 extension syntax
 
 ## Usage
 
 ```cs
-[Union]
+[Union2]
 public readonly partial struct Union1
 {
     // This template is not used at runtime, its only purpose is to provide type symbols to the roslyn analyzer
@@ -75,15 +76,6 @@ public readonly partial struct Union1
         }
     }
     
-    public static Union1 MakeA(int value) { ... }
-    public static Union1 MakeB(string value) { ... }
-    public static Union1 MakeC(bool value) { ... }
-    public static Union1 MakeD((int a, int b) value) { ... }
-    public static Union1 MakeE() { ... }
-    public static Union1 MakeF(List<int>? value) { ... }
-    public static Union1 MakeG((int a, string b) value) { ... }
-    public static Union1 MakeH(int a, int b, string c, HashSet<int> d, (int a, string b) e) { ... }
-    
     public readonly Tags Tag { get; }
     public readonly bool IsA { get; }
     public readonly bool IsB { get; }
@@ -119,6 +111,21 @@ public readonly partial struct Union1
         public ref readonly (int a, string b) e  => ref _impl._f0_0;
         
         ... Eq Cmp ToString
+    }
+}
+
+public static partial class Union1Extensions
+{
+    extension(Union1)
+    {
+        public static Union1 A(int value) { ... }
+        public static Union1 B(string value) { ... }
+        public static Union1 C(bool value) { ... }
+        public static Union1 D((int a, int b) value) { ... }
+        public static Union1 E => ...
+        public static Union1 F(List<int>? value) { ... }
+        public static Union1 G((int a, string b) value) { ... }
+        public static Union1 H(int a, int b, string c, HashSet<int> d, (int a, string b) e) { ... }
     }
 }
 ```
@@ -628,7 +635,7 @@ You can manually determine the Tag or use pattern matching.
 But remember C# **does not have enum exhaustion semantics**.
 
 ```cs
-var u = Union1.MakeA(123);
+var u = Union1.A(123);
 
 if (u is { Tag: Union1.Tags.A, A: var a }) { }
 
@@ -660,7 +667,7 @@ switch (u)
 
 ```cs
 // sizeof(Foo) == 16 (8 data, 1 tag, 7 padding)
-[Union]
+[Union2]
 public partial struct Foo
 {
     [UnionTemplate]
@@ -677,7 +684,7 @@ public partial struct Foo
 ### Option
 
 ```cs
-[Union]
+[Unio2]
 public partial struct Option<T>
 {
     [UnionTemplate]
@@ -692,7 +699,7 @@ public partial struct Option<T>
 ### Result
 
 ```cs
-[Union]
+[Union2]
 public partial struct Result<T, E>
 {
     [UnionTemplate]
@@ -709,7 +716,7 @@ public partial struct Result<T, E>
 [F# Shape](https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/discriminated-unions#remarks)
 
 ```cs
-[Union]
+[Union2]
 public partial struct Shape
 {
     [UnionTemplate]
@@ -723,9 +730,9 @@ public partial struct Shape
 
 public static void Foo()
 {
-    var rect = Shape.MakeRectangle(Length: 1.3f, Width: 1.3f);
-    var circ = Shape.MakeCircle(1.0f);
-    var prism = Shape.MakePrism(5f, 2f, Height: 3f);
+    var rect = Shape.Rectangle(Length: 1.3f, Width: 1.3f);
+    var circ = Shape.Circle(1.0f);
+    var prism = Shape.Prism(5f, 2f, Height: 3f);
 }
 public static void Foo(Shape shape)
 {
@@ -746,7 +753,7 @@ public static void Foo(Shape shape)
 [F# Tree](https://learn.microsoft.com/en-us/dotnet/fsharp/language-reference/discriminated-unions#using-discriminated-unions-for-tree-data-structures)
 
 ```cs
-[Union]
+[Union2]
 public partial class Tree
 {
     [UnionTemplate]

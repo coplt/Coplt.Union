@@ -1,4 +1,8 @@
-﻿## 0.17.0
+﻿## 0.19.0
+- Add Union2
+  - use .net10 extension to create union
+
+## 0.17.0
 - Add
   - UnionSymbolAttribute now allow Enum
 
