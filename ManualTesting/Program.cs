@@ -167,7 +167,7 @@ Console.Write("");
 //  }
 
 [Union2]
-public readonly partial struct TestUnion<T> where T : unmanaged
+internal readonly partial struct TestUnion<T> where T : unmanaged
 {
     [UnionTemplate]
     private interface Template

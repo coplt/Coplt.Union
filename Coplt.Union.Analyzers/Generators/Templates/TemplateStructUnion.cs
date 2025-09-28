@@ -1405,7 +1405,8 @@ public class TemplateStructUnion(
         }
 
         sb.AppendLine();
-        sb.Append("public static partial class ");
+        var acc = Accessibility.GetAccessStr();
+        sb.Append($"{acc} static partial class ");
         sb.AppendFormat(Attr.ExtensionName, TypeNestedName.Replace(".", "_"));
         sb.AppendLine("\n{");
         sb.Append($"    extension");
